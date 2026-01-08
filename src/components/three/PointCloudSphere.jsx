@@ -43,8 +43,12 @@ const createParticleData = () => {
 
       if (dist < connectionDistance) {
         linePositions.push(
-          positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2],
-          positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]
+          positions[i * 3],
+          positions[i * 3 + 1],
+          positions[i * 3 + 2],
+          positions[j * 3],
+          positions[j * 3 + 1],
+          positions[j * 3 + 2]
         );
       }
     }
@@ -68,13 +72,15 @@ const PointCloudSphere = ({ mouse }) => {
 
   useFrame((state) => {
     if (!groupRef.current) return;
-    
+
     const time = state.clock.getElapsedTime();
     const targetRotationX = (mouse?.y || 0) * 0.3;
     const targetRotationY = (mouse?.x || 0) * 0.3;
 
-    groupRef.current.rotation.x += (targetRotationX - groupRef.current.rotation.x) * 0.05;
-    groupRef.current.rotation.y += (targetRotationY + time * 0.1 - groupRef.current.rotation.y) * 0.05;
+    groupRef.current.rotation.x +=
+      (targetRotationX - groupRef.current.rotation.x) * 0.05;
+    groupRef.current.rotation.y +=
+      (targetRotationY + time * 0.1 - groupRef.current.rotation.y) * 0.05;
 
     const scale = 1 + Math.sin(time * 0.5) * 0.03;
     groupRef.current.scale.setScalar(scale);

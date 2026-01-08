@@ -11,7 +11,7 @@ const Hero = () => {
     const handleMouseMove = (e) => {
       // Throttle mouse updates using requestAnimationFrame
       if (rafRef.current) return;
-      
+
       rafRef.current = requestAnimationFrame(() => {
         setMouse({
           x: (e.clientX / window.innerWidth) * 2 - 1,
@@ -39,11 +39,11 @@ const Hero = () => {
         <Canvas
           camera={{ position: [0, 0, 6], fov: 60 }}
           dpr={[1, 1.5]}
-          gl={{ 
-            antialias: true, 
-            alpha: true, 
+          gl={{
+            antialias: true,
+            alpha: true,
             powerPreference: "high-performance",
-            preserveDrawingBuffer: true
+            preserveDrawingBuffer: true,
           }}
           onCreated={({ gl }) => {
             gl.setClearColor(0x000000, 0);
