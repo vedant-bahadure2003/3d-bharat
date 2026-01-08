@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import ThemeToggle from "./ThemeToggle";
+import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,9 +18,11 @@ const Navbar = () => {
 
   const navItems = [
     { name: "Home", href: "#home" },
+    { name: "Challenges", href: "#challenges" },
     { name: "About", href: "#about" },
-    { name: "Create", href: "#create" },
-    { name: "Enquiry", href: "#enquiry" },
+    { name: "Features", href: "#features" },
+    { name: "Solutions", href: "#create" },
+    { name: "Contact", href: "#enquiry" },
   ];
 
   return (
@@ -27,7 +32,7 @@ const Navbar = () => {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-black/80 backdrop-blur-xl border-b border-white/10"
+          ? "bg-stone-100/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-300 dark:border-white/10"
           : "bg-transparent"
       }`}
     >
@@ -40,8 +45,11 @@ const Navbar = () => {
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400 }}
           >
-            <span className="text-2xl font-bold tracking-tight">
-              3D <span className="text-gray-400">Bharat</span>
+            <span className="text-2xl font-bold tracking-tight text-gray-800 dark:text-white">
+              <img
+                src={isDark ? "/images/logo.png" : "/images/logo2.png"}
+                className="w-32 h-32 "
+              />{" "}
             </span>
           </motion.a>
 
@@ -51,7 +59,7 @@ const Navbar = () => {
               <motion.a
                 key={item.name}
                 href={item.href}
-                className="text-sm font-medium text-gray-300 hover:text-white transition-colors duration-300 tracking-wide"
+                className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 tracking-wide"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.4 }}
@@ -60,10 +68,14 @@ const Navbar = () => {
                 {item.name}
               </motion.a>
             ))}
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             <motion.a
               href="#enquiry"
-              className="px-6 py-2.5 border border-white/30 rounded-lg text-sm font-medium
-                         hover:bg-white hover:text-black transition-all duration-300"
+              className="px-6 py-2.5 border border-gray-400 dark:border-white/30 rounded-lg text-sm font-medium
+                         text-gray-700 dark:text-white hover:bg-gray-800 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.4 }}
@@ -75,28 +87,31 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <div className="w-6 h-5 flex flex-col justify-between">
-              <span
-                className={`w-full h-0.5 bg-white transition-all duration-300 ${
-                  mobileMenuOpen ? "rotate-45 translate-y-2" : ""
-                }`}
-              />
-              <span
-                className={`w-full h-0.5 bg-white transition-all duration-300 ${
-                  mobileMenuOpen ? "opacity-0" : ""
-                }`}
-              />
-              <span
-                className={`w-full h-0.5 bg-white transition-all duration-300 ${
-                  mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
-                }`}
-              />
-            </div>
-          </button>
+          <div className="md:hidden flex items-center space-x-4">
+            <ThemeToggle />
+            <button
+              className="p-2"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              <div className="w-6 h-5 flex flex-col justify-between">
+                <span
+                  className={`w-full h-0.5 bg-gray-800 dark:bg-white transition-all duration-300 ${
+                    mobileMenuOpen ? "rotate-45 translate-y-2" : ""
+                  }`}
+                />
+                <span
+                  className={`w-full h-0.5 bg-gray-800 dark:bg-white transition-all duration-300 ${
+                    mobileMenuOpen ? "opacity-0" : ""
+                  }`}
+                />
+                <span
+                  className={`w-full h-0.5 bg-gray-800 dark:bg-white transition-all duration-300 ${
+                    mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
+                  }`}
+                />
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -114,7 +129,7 @@ const Navbar = () => {
               <a
                 key={item.name}
                 href={item.href}
-                className="block text-gray-300 hover:text-white transition-colors py-2"
+                className="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
@@ -122,8 +137,8 @@ const Navbar = () => {
             ))}
             <a
               href="#enquiry"
-              className="inline-block px-6 py-2.5 border border-white/30 rounded-lg text-sm font-medium
-                         hover:bg-white hover:text-black transition-all duration-300"
+              className="inline-block px-6 py-2.5 border border-gray-400 dark:border-white/30 rounded-lg text-sm font-medium
+                         text-gray-700 dark:text-white hover:bg-gray-800 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300"
               onClick={() => setMobileMenuOpen(false)}
             >
               Get Started
