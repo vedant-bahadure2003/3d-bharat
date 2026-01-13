@@ -7,7 +7,6 @@ import Create from "./components/Create";
 import Enquiry from "./components/Enquiry";
 import Footer from "./components/Footer";
 import { ThemeProvider } from "./context/ThemeContext";
-
 function App() {
   return (
     <ThemeProvider>

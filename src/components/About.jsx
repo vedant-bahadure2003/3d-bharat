@@ -1,7 +1,84 @@
-import { motion } from "framer-motion";
-import { Construction, Landmark, Building2, Train } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Construction, Landmark, Building2, Train, ChevronLeft, ChevronRight } from "lucide-react";
 
 const About = () => {
+  // Slider images from public/about folder
+  const sliderImages = [
+    {
+      src: "/about/5_Design Layer Creation.png",
+      title: "Design Layer Creation",
+      description: "Create and manage multiple design layers seamlessly"
+    },
+    {
+      src: "/about/10_Material Line - 1 Created or added.png",
+      title: "Material Filing",
+      description: "Track material lines and additions with accuracy"
+    },
+    {
+      src: "/about/17_Volume_cut_area.png",
+      title: "Cutting Operation",
+      description: "Calculate volume cuts with advanced 3D visualization"
+    },
+    {
+      src: "/about/target-set.png",
+      title: "Target Setting",
+      description: "Define precise targets for your construction projects"
+    },
+    {
+      src: "/about/road-analysis.png",
+      title: "Road Analysis",
+      description: "Comprehensive road condition analysis with precision mapping"
+    },
+    {
+      src: "/about/periodic-graph.png",
+      title: "Periodic Graphs",
+      description: "Comprehensive road condition analysis with precision mapping"
+    }
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  // Preload all images on mount for smooth transitions
+  useEffect(() => {
+    const preloadImages = async () => {
+      const promises = sliderImages.map((image) => {
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.src = image.src;
+          img.onload = resolve;
+          img.onerror = resolve; // Continue even if image fails
+        });
+      });
+      await Promise.all(promises);
+      setImagesLoaded(true);
+    };
+    preloadImages();
+  }, []);
+
+  const nextSlide = useCallback(() => {
+    setCurrentIndex((prev) => (prev + 1) % sliderImages.length);
+  }, [sliderImages.length]);
+
+  const prevSlide = useCallback(() => {
+    setCurrentIndex((prev) => (prev - 1 + sliderImages.length) % sliderImages.length);
+  }, [sliderImages.length]);
+
+  const goToSlide = (index) => {
+    setCurrentIndex(index);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 5000);
+  };
+
+  // Auto-play functionality
+  useEffect(() => {
+    if (!isAutoPlaying || !imagesLoaded) return;
+    const interval = setInterval(nextSlide, 2000);
+    return () => clearInterval(interval);
+  }, [isAutoPlaying, nextSlide, imagesLoaded]);
+
   const useCases = [
     {
       icon: Construction,
@@ -142,69 +219,172 @@ const About = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right - Construction Monitoring Image */}
+          {/* Right - Creative Image Slider */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="relative group"
+            onMouseEnter={() => setIsAutoPlaying(false)}
+            onMouseLeave={() => setIsAutoPlaying(true)}
           >
-            {/* Main Image Container */}
+            {/* Main Slider Container */}
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/20 dark:shadow-black/40">
-              {/* Gradient Border Effect */}
-              <div className="absolute -inset-[1px] bg-gradient-to-br from-emerald-500/30 via-blue-500/30 to-purple-500/30 rounded-2xl blur-sm opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              {/* Image */}
-              <div className="relative rounded-2xl overflow-hidden">
-                <img
-                  src="/images/road-construction-monitoring.png"
-                  alt="Road Construction Monitoring - Engineer using tablet for real-time progress tracking"
-                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+              {/* Animated Gradient Border */}
+              <div className="absolute -inset-[2px] rounded-2xl overflow-hidden">
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 animate-spin-slow opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{ 
+                    backgroundSize: '400% 400%',
+                    animation: 'gradient-rotate 8s linear infinite'
+                  }}
                 />
+              </div>
+              
+              {/* Slider */}
+              <div className="relative rounded-2xl overflow-hidden bg-black/5 dark:bg-black/20 aspect-[4/3]">
+                <AnimatePresence initial={false}>
+                  <motion.div
+                    key={currentIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ 
+                      duration: 0.5, 
+                      ease: "easeInOut"
+                    }}
+                    className="absolute inset-0 will-change-transform"
+                    style={{ backfaceVisibility: 'hidden' }}
+                  >
+                    <img
+                      src={sliderImages[currentIndex].src}
+                      alt={sliderImages[currentIndex].title}
+                      className="w-full h-full object-cover"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </motion.div>
+                </AnimatePresence>
                 
                 {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
                 
-                {/* Badge */}
-                <div className="absolute bottom-4 left-4 right-4">
-                  <div className="glass-theme backdrop-blur-md bg-white/10 dark:bg-black/30 px-4 py-3 rounded-xl border border-white/20">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                      <span className="text-white text-sm font-medium">Live Progress Monitoring</span>
-                    </div>
-                    <p className="text-white/70 text-xs mt-1">Real-time construction tracking with tablet-based field data</p>
-                  </div>
+                {/* Navigation Arrows */}
+                <button
+                  onClick={prevSlide}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white/20 hover:scale-110 z-10"
+                  aria-label="Previous slide"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white/20 hover:scale-110 z-10"
+                  aria-label="Next slide"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                
+                {/* Slide Info Badge */}
+                <div className="absolute bottom-4 left-4 right-4 z-10">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={currentIndex}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.4 }}
+                      className="glass-theme backdrop-blur-md bg-white/10 dark:bg-black/40 px-5 py-4 rounded-xl border border-white/20"
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                        <span className="text-white text-sm font-semibold tracking-wide">
+                          {sliderImages[currentIndex].title}
+                        </span>
+                      </div>
+                      <p className="text-white/70 text-xs leading-relaxed">
+                        {sliderImages[currentIndex].description}
+                      </p>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+                
+                {/* Progress Dots */}
+                <div className="absolute bottom-4 right-6 flex items-center gap-2 z-10">
+                  {sliderImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => goToSlide(index)}
+                      className={`relative transition-all duration-300 ${
+                        index === currentIndex 
+                          ? 'w-8 h-2' 
+                          : 'w-2 h-2 hover:scale-125'
+                      }`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    >
+                      <span 
+                        className={`absolute inset-0 rounded-full transition-all duration-300 ${
+                          index === currentIndex 
+                            ? 'bg-gradient-to-r from-emerald-400 to-blue-400' 
+                            : 'bg-white/40 hover:bg-white/60'
+                        }`}
+                      />
+                      {index === currentIndex && (
+                        <motion.span
+                          layoutId="activeSlide"
+                          className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400 to-blue-400"
+                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                        />
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Floating Stats Cards */}
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="absolute -right-4 top-8 glass-theme backdrop-blur-md bg-white/80 dark:bg-black/50 px-4 py-3 rounded-xl shadow-lg border border-white/20 dark:border-white/10"
+              className="absolute -right-4 top-8 glass-theme backdrop-blur-md bg-white/90 dark:bg-black/60 px-4 py-3 rounded-xl shadow-lg border border-white/30 dark:border-white/10 hover:scale-105 transition-transform"
             >
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">98%</div>
+              <div className="text-2xl font-bold bg-gradient-to-r from-emerald-500 to-blue-500 bg-clip-text text-transparent">98%</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Accuracy Rate</div>
-            </motion.div>
+            </motion.div> */}
 
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.6, duration: 0.6 }}
-              className="absolute -left-4 bottom-24 glass-theme backdrop-blur-md bg-white/80 dark:bg-black/50 px-4 py-3 rounded-xl shadow-lg border border-white/20 dark:border-white/10"
+              className="absolute -left-4 bottom-24 glass-theme backdrop-blur-md bg-white/90 dark:bg-black/60 px-4 py-3 rounded-xl shadow-lg border border-white/30 dark:border-white/10 hover:scale-105 transition-transform"
             >
-              <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">24/7</div>
+              <div className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">24/7</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">Monitoring</div>
+            </motion.div> */}
+
+            {/* Slide Counter */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="absolute -top-3 left-1/2 -translate-x-1/2 glass-theme backdrop-blur-md bg-white/90 dark:bg-black/60 px-4 py-2 rounded-full shadow-lg border border-white/30 dark:border-white/10"
+            >
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-emerald-500 font-bold">{currentIndex + 1}</span>
+                <span className="text-gray-400 mx-1">/</span>
+                <span>{sliderImages.length}</span>
+              </span>
             </motion.div>
 
             {/* Decorative elements */}
             <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-emerald-500/10 dark:bg-emerald-500/5 rounded-full blur-3xl pointer-events-none transition-colors duration-300" />
             <div className="absolute -z-10 top-0 right-0 w-40 h-40 bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -z-10 bottom-0 left-0 w-32 h-32 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
           </motion.div>
         </div>
       </div>

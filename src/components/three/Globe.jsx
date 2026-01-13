@@ -34,7 +34,7 @@ const getThemeColors = (isDark) => ({
   directionalIntensity: isDark ? 0.8 : 0.5,
   pointLightColor: isDark ? "#a855f7" : "#f97316",
   // Country polygon colors
-  polygonColor: isDark ? "#334155" : "#a8a29e",
+  polygonColor: isDark ? "#334155" : "#60564fff",
   polygonSideColor: isDark
     ? "rgba(51, 65, 85, 0.8)"
     : "rgba(168, 162, 158, 0.8)",
@@ -152,7 +152,7 @@ const Globe = ({ isDark = true }) => {
       const globe = new ThreeGlobe({ animateIn: false })
         .showAtmosphere(true)
         .atmosphereColor(initColors.atmosphereColor)
-        .atmosphereAltitude(isDark ? 0.2 : 0.15);
+        .atmosphereAltitude(isDark ? 0.12 : 0.08);
 
       // Use solid color material instead of texture
       const globeMaterial = globe.globeMaterial();
@@ -195,7 +195,7 @@ const Globe = ({ isDark = true }) => {
     // Update atmosphere
     globeInstance
       .atmosphereColor(colors.atmosphereColor)
-      .atmosphereAltitude(isDark ? 0.2 : 0.15);
+      .atmosphereAltitude(isDark ? 0.12 : 0.08);
 
     // Update polygon colors
     globeInstance
@@ -266,8 +266,8 @@ const Globe = ({ isDark = true }) => {
         color={colors.pointLightColor}
       />
 
-      {/* Globe group with proper scale */}
-      <group ref={groupRef} scale={[0.02, 0.02, 0.02]}>
+      {/* Globe group with smaller scale to fit in container */}
+      <group ref={groupRef} scale={[0.015, 0.015, 0.015]}>
         <primitive object={globeInstance} />
       </group>
 

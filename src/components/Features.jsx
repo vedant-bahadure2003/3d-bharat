@@ -1,5 +1,6 @@
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
 import { motion } from "framer-motion";
 import {
   Layers,
@@ -13,12 +14,46 @@ import {
   BarChart3,
   Shield,
 } from "lucide-react";
-import DataFlow from "./three/DataFlow";
 import MergerVisualization from "./three/MergerVisualization";
 import { useTheme } from "../context/ThemeContext";
 
 const Features = () => {
   const { isDark } = useTheme();
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  const designLayerImages = [
+    {
+      src: "/images/Screenshot 2026-01-09 152543 (1).png",
+      alt: "Primary Frame Layer - Curve Road Design",
+      title: "Primary Frame Layer",
+      description: "Core framework with chainage scale visualization",
+      color: "from-cyan-500 to-blue-500",
+    },
+    {
+      src: "/images/10_Material Line - 1 Created or added.png",
+      alt: "Material Layer - Road Construction Layers",
+      title: "Material Layer",
+      description: "Detailed material mapping for road construction",
+      color: "from-purple-500 to-pink-500",
+    },
+    {
+      src: "/images/17_Volume_cut_area.png",
+      alt: "Measurement Layer - Volume Cut Area Calculation",
+      title: "Measurement Layer",
+      description: "Precise volume calculation and cut/fill analysis",
+      color: "from-green-500 to-emerald-500",
+    },
+  ];
+
+  // Auto-cycle through images every 2 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveImageIndex((prev) => (prev + 1) % designLayerImages.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [designLayerImages.length]);
+
 
   const designLayers = [
     {
@@ -50,36 +85,42 @@ const Features = () => {
       title: "Planning & Work Targets",
       description:
         "Chainage-wise work targets are defined with clear timelines. Contractors are assigned tasks, and drone monitoring is planned in advance.",
+      bgImage: "/images/target-set.png",
     },
     {
       icon: Tablet,
       title: "Tablet-Based Field Entry",
       description:
         "Engineers record work execution using tablets. fortnightly, monthly, or quarterly. Reports are generated automatically.",
+      bgImage: "/images/road-construction-monitoring.png",
     },
     {
       icon: Globe,
       title: "Web-Based Drone Upload",
       description:
         "Drone teams upload panoramic images and 3D point cloud data through a web interface, providing visual confirmation of progress.",
+      bgImage: "/images/web-drone.png",
     },
     {
       icon: BarChart3,
       title: "Periodic Web Monitoring",
       description:
         "Authorities view targets versus progress, access dashboards on web or tablet, and monitor multiple projects without site visits.",
+      bgImage: "/images/periodic-graph.png",
     },
     {
       icon: Users,
       title: "Multi-User Management",
       description:
         "Role-based access for all stakeholders ensures accurate measurement, clear planning, and daily accountability.",
+      bgImage: "/images/multi-user-management.png",
     },
     {
       icon: Shield,
       title: "Data Security",
       description:
         "Enterprise-grade security with encrypted data transmission and secure storage for all project information.",
+      bgImage: "https://www.goanywhere.com/sites/default/files/styles/og_image/public/goanywhere/ga-the-data-security-lifecycle-blog-850x330.jpg.webp?itok=vL8t-n_n",
     },
   ];
 
@@ -129,7 +170,7 @@ const Features = () => {
             variants={itemVariants}
             className="text-4xl md:text-5xl font-bold mb-6 tracking-tight"
           >
-            Three-Layer <span className="text-gradient">Digital Design</span>
+            3D <span className="text-gradient">Design Tool</span>
           </motion.h2>
           <motion.p
             variants={itemVariants}
@@ -142,27 +183,63 @@ const Features = () => {
         </motion.div>
 
         {/* Design Framework - 3 Layers with 3D Visualization */}
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-32">
-          {/* Left - 3D Visualization */}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-24">
+          {/* Left - Design Layer Images Slideshow */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="h-[400px] md:h-[450px] relative order-2 lg:order-1"
+            className="relative order-2 lg:order-1 h-[350px] md:h-[400px]"
           >
-            <Canvas
-              camera={{ position: [0, 2, 6], fov: 50 }}
-              dpr={[1, 2]}
-              gl={{ antialias: true, alpha: true }}
-            >
-              <Suspense fallback={null}>
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={0.5} />
-                <DataFlow isDark={isDark} />
-              </Suspense>
-            </Canvas>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gray-500/10 dark:bg-white/5 rounded-full blur-3xl pointer-events-none" />
+            {/* Image Slideshow Container */}
+            <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-2xl">
+              {designLayerImages.map((image, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0 }}
+                  animate={{ 
+                    opacity: activeImageIndex === index ? 1 : 0,
+                    scale: activeImageIndex === index ? 1 : 1.05
+                  }}
+                  transition={{ duration: 0.7, ease: "easeInOut" }}
+                  className="absolute inset-0"
+                >
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Overlay with label */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${image.color} shadow-lg`}></div>
+                      <span className="text-white font-bold text-lg">{image.title}</span>
+                    </div>
+                    <p className="text-white/80 text-sm mt-2">{image.description}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Indicator dots */}
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+              {designLayerImages.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveImageIndex(index)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    activeImageIndex === index
+                      ? `bg-gradient-to-r ${image.color} scale-125`
+                      : 'bg-gray-400 dark:bg-gray-600 hover:bg-gray-500'
+                  }`}
+                  aria-label={`View ${image.title}`}
+                />
+              ))}
+            </div>
+            
+            {/* Background glow effect */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gray-500/10 dark:bg-white/5 rounded-full blur-3xl pointer-events-none -z-10" />
           </motion.div>
 
           {/* Right - Layer Cards */}
@@ -202,7 +279,7 @@ const Features = () => {
         </div>
 
         {/* Merger Layer Section */}
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-32">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-24">
           {/* Left Content */}
           <motion.div
             variants={containerVariants}
@@ -259,14 +336,24 @@ const Features = () => {
             className="h-[400px] md:h-[450px] relative"
           >
             <Canvas
-              camera={{ position: [0, 1, 5], fov: 50 }}
+              camera={{ position: [0, 3, 5], fov: 55 }}
               dpr={[1, 2]}
               gl={{ antialias: true, alpha: true }}
+              style={{ overflow: 'visible' }}
             >
               <Suspense fallback={null}>
                 <ambientLight intensity={0.5} />
                 <pointLight position={[10, 10, 10]} intensity={0.5} />
                 <MergerVisualization isDark={isDark} />
+                <OrbitControls 
+                  enableZoom={true}
+                  enablePan={false}
+                  minDistance={3}
+                  maxDistance={12}
+                  minPolarAngle={Math.PI / 6}
+                  maxPolarAngle={Math.PI / 2}
+                  autoRotate={false}
+                />
               </Suspense>
             </Canvas>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
@@ -291,10 +378,10 @@ const Features = () => {
             variants={itemVariants}
             className="text-3xl md:text-4xl font-bold mb-6 tracking-tight"
           >
-            End-to-End <span className="text-gradient">Project Management</span>
+         Precise Work <span className="text-gradient">Progress Monitoring Flow</span>
           </motion.h3>
         </motion.div>
-
+ 
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -306,18 +393,29 @@ const Features = () => {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="glass-theme p-8 rounded-2xl card-hover group"
+              className="relative overflow-hidden rounded-2xl card-hover group min-h-[280px]"
               whileHover={{ scale: 1.02 }}
             >
-              <div className="w-14 h-14 mb-6 rounded-xl bg-gray-200/50 dark:bg-white/5 flex items-center justify-center group-hover:bg-gray-300/50 dark:group-hover:bg-white/10 transition-colors">
-                <feature.icon className="w-7 h-7 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
+              {/* Background Image */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                style={{ backgroundImage: `url(${feature.bgImage})` }}
+              />
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30 group-hover:from-black/95 group-hover:via-black/70 transition-all duration-300" />
+              
+              {/* Content */}
+              <div className="relative z-10 p-8 h-full flex flex-col justify-end">
+                <div className="w-14 h-14 mb-6 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/20 transition-colors">
+                  <feature.icon className="w-7 h-7 text-white/80 group-hover:text-white transition-colors" />
+                </div>
+                <h4 className="text-lg font-semibold text-white mb-3 tracking-wide">
+                  {feature.title}
+                </h4>
+                <p className="text-sm text-white/70 leading-relaxed group-hover:text-white/90 transition-colors">
+                  {feature.description}
+                </p>
               </div>
-              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 tracking-wide transition-colors duration-300">
-                {feature.title}
-              </h4>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                {feature.description}
-              </p>
             </motion.div>
           ))}
         </motion.div>

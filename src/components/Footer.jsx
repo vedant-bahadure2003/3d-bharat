@@ -41,7 +41,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-stone-200 dark:bg-black border-t border-gray-300 dark:border-white/10 transition-colors duration-300 relative overflow-hidden">
+    <footer className="bg-stone-200 dark:bg-black border-t border-gray-300 dark:border-white/10 transition-colors duration-300 relative">
       {/* Background decorative elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-emerald-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
       
@@ -120,13 +120,13 @@ const Footer = () => {
               Nationwide Coverage
             </span>
             
-            {/* Globe Container - Fixed size with proper padding */}
-            <div className="w-52 h-52 relative ">
+            {/* Globe Container - Larger size to prevent edge clipping */}
+            <div className="w-64 h-64 relative overflow-visible">
               <Canvas
-                camera={{ position: [0, 0, 5], fov: 45 }}
+                camera={{ position: [0, 0, 6.5], fov: 35 }}
                 dpr={[1, 1.5]}
                 gl={{ antialias: true, alpha: true }}
-                style={{ width: '100%', height: '100%' }}
+                style={{ width: '100%', height: '100%', overflow: 'visible' }}
               >
                 <Suspense fallback={null}>
                   <ambientLight intensity={0.3} />
@@ -136,7 +136,7 @@ const Footer = () => {
               </Canvas>
               
               {/* Glow effect behind globe */}
-              <div className="absolute inset-4 -z-10 bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-purple-500/10 rounded-full blur-xl" />
+              <div className="absolute inset-6 -z-10 bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-purple-500/10 rounded-full blur-xl" />
             </div>
 
             {/* Stats below globe */}

@@ -104,7 +104,7 @@ const Enquiry = () => {
               formData.projectType || "General Enquiry"
             }`,
             html: emailHtml,
-            from: '"3D Bharat Enquiry" <transactions@mounarchtech.com>',
+            from: '"3D Bharat Enquiry" ',
           }),
         }
       );

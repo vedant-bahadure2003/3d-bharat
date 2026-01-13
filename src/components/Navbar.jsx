@@ -47,7 +47,7 @@ const Navbar = () => {
           >
             <span className="text-2xl font-bold tracking-tight text-gray-800 dark:text-white">
               <img
-                src={isDark ? "/images/logo.png" : "/images/logo2.png"}
+                src={scrolled ? (isDark ? "/images/logo.png" : "/images/logo2.png") : "/images/logo.png"}
                 className="w-32 h-32 "
               />{" "}
             </span>
@@ -59,7 +59,7 @@ const Navbar = () => {
               <motion.a
                 key={item.name}
                 href={item.href}
-                className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 tracking-wide"
+                className={`text-sm font-medium transition-colors duration-300 tracking-wide ${scrolled ? 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' : 'text-white/90 hover:text-white'}`}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.4 }}
@@ -74,8 +74,7 @@ const Navbar = () => {
 
             <motion.a
               href="#enquiry"
-              className="px-6 py-2.5 border border-gray-400 dark:border-white/30 rounded-lg text-sm font-medium
-                         text-gray-700 dark:text-white hover:bg-gray-800 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300"
+              className={`px-6 py-2.5 border rounded-lg text-sm font-medium transition-all duration-300 ${scrolled ? 'border-gray-400 dark:border-white/30 text-gray-700 dark:text-white hover:bg-gray-800 hover:text-white dark:hover:bg-white dark:hover:text-black' : 'border-white/50 text-white hover:bg-white/20'}`}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.4 }}
@@ -95,17 +94,17 @@ const Navbar = () => {
             >
               <div className="w-6 h-5 flex flex-col justify-between">
                 <span
-                  className={`w-full h-0.5 bg-gray-800 dark:bg-white transition-all duration-300 ${
+                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? 'bg-gray-800 dark:bg-white' : 'bg-white'} ${
                     mobileMenuOpen ? "rotate-45 translate-y-2" : ""
                   }`}
                 />
                 <span
-                  className={`w-full h-0.5 bg-gray-800 dark:bg-white transition-all duration-300 ${
+                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? 'bg-gray-800 dark:bg-white' : 'bg-white'} ${
                     mobileMenuOpen ? "opacity-0" : ""
                   }`}
                 />
                 <span
-                  className={`w-full h-0.5 bg-gray-800 dark:bg-white transition-all duration-300 ${
+                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? 'bg-gray-800 dark:bg-white' : 'bg-white'} ${
                     mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
                   }`}
                 />
