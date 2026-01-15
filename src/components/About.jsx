@@ -1,40 +1,78 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Construction, Landmark, Building2, Train, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Construction,
+  Landmark,
+  Building2,
+  Train,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 const About = () => {
   // Slider images from public/about folder
   const sliderImages = [
     {
-      src: "/about/5_Design Layer Creation.png",
+      src: "/images/curve-layer.png",
       title: "Design Layer Creation",
-      description: "Create and manage multiple design layers seamlessly"
-    },
-    {
-      src: "/about/10_Material Line - 1 Created or added.png",
-      title: "Material Filing",
-      description: "Track material lines and additions with accuracy"
+      description: "Create and manage multiple design layers seamlessly",
     },
     {
       src: "/about/17_Volume_cut_area.png",
       title: "Cutting Operation",
-      description: "Calculate volume cuts with advanced 3D visualization"
+      description: "Calculate volume cuts with advanced 3D visualization",
+    },
+    {
+      src: "/about/10_Material Line - 1 Created or added.png",
+      title: "Material Filing",
+      description: "Track material lines and additions with accuracy",
+    },
+
+    {
+      src: "/images/target-set.png",
+      title: "Planning & Work Targets",
+      description:
+        "Chainage-wise work targets are defined with clear timelines. Contractors are assigned tasks, and drone monitoring is planned in advance.",
     },
     {
       src: "/about/target-set.png",
       title: "Target Setting",
-      description: "Define precise targets for your construction projects"
+      description: "Define precise targets for your construction projects",
     },
     {
       src: "/about/road-analysis.png",
-      title: "Road Analysis",
-      description: "Comprehensive road condition analysis with precision mapping"
+      title: "Work Progress Analysis",
+      description:
+        "Comprehensive road condition analysis with precision mapping",
     },
     {
       src: "/about/periodic-graph.png",
       title: "Periodic Graphs",
-      description: "Comprehensive road condition analysis with precision mapping"
-    }
+      description:
+        "Comprehensive road condition analysis with precision mapping",
+    },
+    {
+      src: "/images/bridge.jpg",
+      title: "Bridge Construction",
+      description: "Comprehensive bridge construction with precision mapping",
+    },
+    {
+      src: "/about/Picture1 (1).jpg",
+      title: "Bridge Construction",
+      description: "Comprehensive bridge construction with precision mapping",
+    },
+    {
+      src: "/about/drone-verification.png",
+      title: "Drone Verification",
+      description:
+        "Independent drone-based verification of construction progress and quality",
+    },
+    {
+      src: "/about/drone-mapping-periodic-surveys.png",
+      title: "Drone Mapping & Periodic Surveys",
+      description:
+        "Regular drone surveys for comprehensive site mapping and progress tracking",
+    },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -63,7 +101,9 @@ const About = () => {
   }, [sliderImages.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + sliderImages.length) % sliderImages.length);
+    setCurrentIndex(
+      (prev) => (prev - 1 + sliderImages.length) % sliderImages.length
+    );
   }, [sliderImages.length]);
 
   const goToSlide = (index) => {
@@ -233,15 +273,15 @@ const About = () => {
             <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/20 dark:shadow-black/40">
               {/* Animated Gradient Border */}
               <div className="absolute -inset-[2px] rounded-2xl overflow-hidden">
-                <div 
+                <div
                   className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 animate-spin-slow opacity-60 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{ 
-                    backgroundSize: '400% 400%',
-                    animation: 'gradient-rotate 8s linear infinite'
+                  style={{
+                    backgroundSize: "400% 400%",
+                    animation: "gradient-rotate 8s linear infinite",
                   }}
                 />
               </div>
-              
+
               {/* Slider */}
               <div className="relative rounded-2xl overflow-hidden bg-black/5 dark:bg-black/20 aspect-[4/3]">
                 <AnimatePresence initial={false}>
@@ -250,12 +290,12 @@ const About = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    transition={{ 
-                      duration: 0.5, 
-                      ease: "easeInOut"
+                    transition={{
+                      duration: 0.5,
+                      ease: "easeInOut",
                     }}
                     className="absolute inset-0 will-change-transform"
-                    style={{ backfaceVisibility: 'hidden' }}
+                    style={{ backfaceVisibility: "hidden" }}
                   >
                     <img
                       src={sliderImages[currentIndex].src}
@@ -266,10 +306,10 @@ const About = () => {
                     />
                   </motion.div>
                 </AnimatePresence>
-                
+
                 {/* Overlay Gradient */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
-                
+
                 {/* Navigation Arrows */}
                 <button
                   onClick={prevSlide}
@@ -285,7 +325,7 @@ const About = () => {
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
-                
+
                 {/* Slide Info Badge */}
                 <div className="absolute bottom-4 left-4 right-4 z-10">
                   <AnimatePresence mode="wait">
@@ -309,7 +349,7 @@ const About = () => {
                     </motion.div>
                   </AnimatePresence>
                 </div>
-                
+
                 {/* Progress Dots */}
                 <div className="absolute bottom-4 right-6 flex items-center gap-2 z-10">
                   {sliderImages.map((_, index) => (
@@ -317,24 +357,28 @@ const About = () => {
                       key={index}
                       onClick={() => goToSlide(index)}
                       className={`relative transition-all duration-300 ${
-                        index === currentIndex 
-                          ? 'w-8 h-2' 
-                          : 'w-2 h-2 hover:scale-125'
+                        index === currentIndex
+                          ? "w-8 h-2"
+                          : "w-2 h-2 hover:scale-125"
                       }`}
                       aria-label={`Go to slide ${index + 1}`}
                     >
-                      <span 
+                      <span
                         className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                          index === currentIndex 
-                            ? 'bg-gradient-to-r from-emerald-400 to-blue-400' 
-                            : 'bg-white/40 hover:bg-white/60'
+                          index === currentIndex
+                            ? "bg-gradient-to-r from-emerald-400 to-blue-400"
+                            : "bg-white/40 hover:bg-white/60"
                         }`}
                       />
                       {index === currentIndex && (
                         <motion.span
                           layoutId="activeSlide"
                           className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-400 to-blue-400"
-                          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 30,
+                          }}
                         />
                       )}
                     </button>
@@ -375,7 +419,9 @@ const About = () => {
               className="absolute -top-3 left-1/2 -translate-x-1/2 glass-theme backdrop-blur-md bg-white/90 dark:bg-black/60 px-4 py-2 rounded-full shadow-lg border border-white/30 dark:border-white/10"
             >
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                <span className="text-emerald-500 font-bold">{currentIndex + 1}</span>
+                <span className="text-emerald-500 font-bold">
+                  {currentIndex + 1}
+                </span>
                 <span className="text-gray-400 mx-1">/</span>
                 <span>{sliderImages.length}</span>
               </span>

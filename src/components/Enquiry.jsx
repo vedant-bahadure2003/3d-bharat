@@ -188,7 +188,7 @@ const Enquiry = () => {
               variants={itemVariants}
               className="text-4xl md:text-5xl font-bold mb-6 tracking-tight"
             >
-              Start Your <span className="text-gradient">Project</span>
+              Connect with <span className="text-gradient">us</span>
             </motion.h2>
 
             <motion.p

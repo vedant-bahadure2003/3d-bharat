@@ -89,7 +89,7 @@ const Hero = () => {
         />
         {/* Video 2 */}
         <video
-          ref={video2Ref}
+          ref={video2Ref} 
           src={videos[1]}
           muted
           playsInline

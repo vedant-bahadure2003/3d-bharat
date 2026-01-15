@@ -17,12 +17,11 @@ const Navbar = () => {
   }, []);
 
   const navItems = [
-    { name: "Home", href: "#home" },
-    { name: "Challenges", href: "#challenges" },
-    { name: "About", href: "#about" },
-    { name: "Features", href: "#features" },
-    { name: "Solutions", href: "#create" },
-    { name: "Contact", href: "#enquiry" },
+    { name: "Home", href: "/" },
+    { name: "Measurements", href: "/measurement" },
+    { name: "Videos", href: "/videos" },
+    { name: "About", href: "/#about" },
+    { name: "Contact", href: "/#enquiry" },
   ];
 
   return (
@@ -40,7 +39,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <motion.a
-            href="#home"
+            href="/"
             className="flex items-center space-x-2"
             whileHover={{ scale: 1.05 }}
             transition={{ type: "spring", stiffness: 400 }}
@@ -73,7 +72,7 @@ const Navbar = () => {
             <ThemeToggle />
 
             <motion.a
-              href="#enquiry"
+              href="/#enquiry"
               className={`px-6 py-2.5 border rounded-lg text-sm font-medium transition-all duration-300 ${scrolled ? 'border-gray-400 dark:border-white/30 text-gray-700 dark:text-white hover:bg-gray-800 hover:text-white dark:hover:bg-white dark:hover:text-black' : 'border-white/50 text-white hover:bg-white/20'}`}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -135,7 +134,7 @@ const Navbar = () => {
               </a>
             ))}
             <a
-              href="#enquiry"
+              href="/#enquiry"
               className="inline-block px-6 py-2.5 border border-gray-400 dark:border-white/30 rounded-lg text-sm font-medium
                          text-gray-700 dark:text-white hover:bg-gray-800 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300"
               onClick={() => setMobileMenuOpen(false)}

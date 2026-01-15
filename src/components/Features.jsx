@@ -1,6 +1,4 @@
-import { Suspense, useState, useEffect } from "react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Layers,
@@ -14,17 +12,24 @@ import {
   BarChart3,
   Shield,
 } from "lucide-react";
-import MergerVisualization from "./three/MergerVisualization";
 import { useTheme } from "../context/ThemeContext";
 
 const Features = () => {
   const { isDark } = useTheme();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [workflowSlideIndex, setWorkflowSlideIndex] = useState(0);
 
   const designLayerImages = [
     {
-      src: "/images/Screenshot 2026-01-09 152543 (1).png",
+      src: "/images/curve-layer.png",
       alt: "Primary Frame Layer - Curve Road Design",
+      title: "Primary Frame Layer",
+      description: "Core framework with chainage scale visualization",
+      color: "from-cyan-500 to-blue-500",
+    },
+    {
+      src: "/images/5_Design Layer Creation.png",
+      alt: "Primary Frame Layer - Straight Road Design",
       title: "Primary Frame Layer",
       description: "Core framework with chainage scale visualization",
       color: "from-cyan-500 to-blue-500",
@@ -45,7 +50,7 @@ const Features = () => {
     },
   ];
 
-  // Auto-cycle through images every 2 seconds
+  // Auto-cycle through design layer images every 2 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveImageIndex((prev) => (prev + 1) % designLayerImages.length);
@@ -54,6 +59,14 @@ const Features = () => {
     return () => clearInterval(interval);
   }, [designLayerImages.length]);
 
+  // Auto-cycle workflow card slideshows every 1.5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWorkflowSlideIndex((prev) => (prev + 1) % 2);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const designLayers = [
     {
@@ -92,14 +105,17 @@ const Features = () => {
       title: "Tablet-Based Field Entry",
       description:
         "Engineers record work execution using tablets. fortnightly, monthly, or quarterly. Reports are generated automatically.",
-      bgImage: "/images/road-construction-monitoring.png",
+      bgImages: [
+        "/images/road-construction-monitoring.png",
+        "/images/progress.png",
+      ],
     },
     {
       icon: Globe,
       title: "Web-Based Drone Upload",
       description:
         "Drone teams upload panoramic images and 3D point cloud data through a web interface, providing visual confirmation of progress.",
-      bgImage: "/images/web-drone.png",
+      bgImage: "/about/road-analysis.png",
     },
     {
       icon: BarChart3,
@@ -120,7 +136,8 @@ const Features = () => {
       title: "Data Security",
       description:
         "Enterprise-grade security with encrypted data transmission and secure storage for all project information.",
-      bgImage: "https://www.goanywhere.com/sites/default/files/styles/og_image/public/goanywhere/ga-the-data-security-lifecycle-blog-850x330.jpg.webp?itok=vL8t-n_n",
+      bgImage:
+        "https://www.goanywhere.com/sites/default/files/styles/og_image/public/goanywhere/ga-the-data-security-lifecycle-blog-850x330.jpg.webp?itok=vL8t-n_n",
     },
   ];
 
@@ -198,9 +215,9 @@ const Features = () => {
                 <motion.div
                   key={index}
                   initial={{ opacity: 0 }}
-                  animate={{ 
+                  animate={{
                     opacity: activeImageIndex === index ? 1 : 0,
-                    scale: activeImageIndex === index ? 1 : 1.05
+                    scale: activeImageIndex === index ? 1 : 1.05,
                   }}
                   transition={{ duration: 0.7, ease: "easeInOut" }}
                   className="absolute inset-0"
@@ -213,10 +230,16 @@ const Features = () => {
                   {/* Overlay with label */}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-6">
                     <div className="flex items-center gap-3">
-                      <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${image.color} shadow-lg`}></div>
-                      <span className="text-white font-bold text-lg">{image.title}</span>
+                      <div
+                        className={`w-4 h-4 rounded-full bg-gradient-to-r ${image.color} shadow-lg`}
+                      ></div>
+                      <span className="text-white font-bold text-lg">
+                        {image.title}
+                      </span>
                     </div>
-                    <p className="text-white/80 text-sm mt-2">{image.description}</p>
+                    <p className="text-white/80 text-sm mt-2">
+                      {image.description}
+                    </p>
                   </div>
                 </motion.div>
               ))}
@@ -231,13 +254,13 @@ const Features = () => {
                   className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
                     activeImageIndex === index
                       ? `bg-gradient-to-r ${image.color} scale-125`
-                      : 'bg-gray-400 dark:bg-gray-600 hover:bg-gray-500'
+                      : "bg-gray-400 dark:bg-gray-600 hover:bg-gray-500"
                   }`}
                   aria-label={`View ${image.title}`}
                 />
               ))}
             </div>
-            
+
             {/* Background glow effect */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gray-500/10 dark:bg-white/5 rounded-full blur-3xl pointer-events-none -z-10" />
           </motion.div>
@@ -327,36 +350,71 @@ const Features = () => {
             </motion.ul>
           </motion.div>
 
-          {/* Right - 3D Merger Visualization */}
+          {/* Right - Merger Layer Image Display */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8 }}
-            className="h-[400px] md:h-[450px] relative"
+            className="relative"
           >
-            <Canvas
-              camera={{ position: [0, 3, 5], fov: 55 }}
-              dpr={[1, 2]}
-              gl={{ antialias: true, alpha: true }}
-              style={{ overflow: 'visible' }}
-            >
-              <Suspense fallback={null}>
-                <ambientLight intensity={0.5} />
-                <pointLight position={[10, 10, 10]} intensity={0.5} />
-                <MergerVisualization isDark={isDark} />
-                <OrbitControls 
-                  enableZoom={true}
-                  enablePan={false}
-                  minDistance={3}
-                  maxDistance={12}
-                  minPolarAngle={Math.PI / 6}
-                  maxPolarAngle={Math.PI / 2}
-                  autoRotate={false}
+            {/* Main Image Container */}
+            <div className="relative group">
+              {/* Subtle floating shadow layers */}
+              <div className="absolute -inset-4 bg-gray-400/40 dark:bg-white/5 rounded-3xl blur-2xl transition-opacity duration-500 group-hover:opacity-80" />
+
+              {/* Image Frame */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-black/20 dark:shadow-black/50 border border-gray-300 dark:border-white/10 bg-white dark:bg-gray-900">
+                {/* Window header bar */}
+                <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex gap-2">
+                    <span className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
+                    <span className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
+                    <span className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-medium tracking-wide">
+                    Merger Mode — All Layers Combined
+                  </span>
+                </div>
+
+                {/* The Image */}
+                <img
+                  src="/images/merger 2.png"
+                  alt="Merger Layer Visualization - Combined 3D Design Layers"
+                  className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                 />
-              </Suspense>
-            </Canvas>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-500/10 dark:bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+
+                {/* Bottom status bar */}
+                <div className="flex items-center justify-between px-4 py-3 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-gray-900 dark:bg-white animate-pulse" />
+                    <span className="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                      Layers Synced
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Chainage: 101+000
+                  </span>
+                </div>
+              </div>
+
+              {/* Floating layer indicators */}
+              <div className="absolute -right-2 top-1/4 z-10 hidden lg:block">
+                <div className="px-3 py-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-semibold shadow-lg">
+                  Primary
+                </div>
+              </div>
+              <div className="absolute -left-2 top-1/2 z-10 hidden lg:block">
+                <div className="px-3 py-1.5 rounded-lg bg-gray-700 dark:bg-gray-300 text-white dark:text-gray-900 text-xs font-semibold shadow-lg">
+                  Material
+                </div>
+              </div>
+              <div className="absolute -right-2 bottom-1/4 z-10 hidden lg:block">
+                <div className="px-3 py-1.5 rounded-lg bg-gray-500 text-white text-xs font-semibold shadow-lg">
+                  Measurement
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
 
@@ -378,10 +436,11 @@ const Features = () => {
             variants={itemVariants}
             className="text-3xl md:text-4xl font-bold mb-6 tracking-tight"
           >
-         Precise Work <span className="text-gradient">Progress Monitoring Flow</span>
+            Precise Work{" "}
+            <span className="text-gradient">Progress Monitoring Flow</span>
           </motion.h3>
         </motion.div>
- 
+
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -396,14 +455,49 @@ const Features = () => {
               className="relative overflow-hidden rounded-2xl card-hover group min-h-[280px]"
               whileHover={{ scale: 1.02 }}
             >
-              {/* Background Image */}
-              <div 
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                style={{ backgroundImage: `url(${feature.bgImage})` }}
-              />
+              {/* Background Image(s) */}
+              {feature.bgImages ? (
+                // Slideshow for multiple images
+                feature.bgImages.map((img, imgIndex) => (
+                  <div
+                    key={imgIndex}
+                    className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out group-hover:scale-110"
+                    style={{
+                      backgroundImage: `url(${img})`,
+                      opacity: workflowSlideIndex === imgIndex ? 1 : 0,
+                      transform:
+                        workflowSlideIndex === imgIndex
+                          ? "scale(1)"
+                          : "scale(1.05)",
+                    }}
+                  />
+                ))
+              ) : (
+                // Single background image
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                  style={{ backgroundImage: `url(${feature.bgImage})` }}
+                />
+              )}
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30 group-hover:from-black/95 group-hover:via-black/70 transition-all duration-300" />
-              
+
+              {/* Slideshow indicators for cards with multiple images */}
+              {feature.bgImages && (
+                <div className="absolute top-4 right-4 flex gap-1.5 z-20">
+                  {feature.bgImages.map((_, dotIndex) => (
+                    <span
+                      key={dotIndex}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        workflowSlideIndex === dotIndex
+                          ? "bg-white scale-125"
+                          : "bg-white/40"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+
               {/* Content */}
               <div className="relative z-10 p-8 h-full flex flex-col justify-end">
                 <div className="w-14 h-14 mb-6 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/20 transition-colors">

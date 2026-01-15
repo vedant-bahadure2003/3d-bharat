@@ -269,7 +269,7 @@ const Challenges = () => {
               }`}
             >
               <p
-                className={`text-xl md:text-2xl italic max-w-3xl mx-auto ${
+                className={`text-lg md:text-xl italic max-w-2xl mx-auto ${
                   isDark ? "text-gray-300" : "text-gray-600"
                 }`}
                 style={{

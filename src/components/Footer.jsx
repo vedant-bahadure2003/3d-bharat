@@ -44,11 +44,10 @@ const Footer = () => {
     <footer className="bg-stone-200 dark:bg-black border-t border-gray-300 dark:border-white/10 transition-colors duration-300 relative">
       {/* Background decorative elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-emerald-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
         {/* Main Footer Content */}
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-8 mb-10">
-          
           {/* Left Section - Brand & Links */}
           <motion.div
             variants={containerVariants}
@@ -66,7 +65,8 @@ const Footer = () => {
                 3D <span className="text-gray-500">Bharat</span>
               </h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-6 max-w-xs">
-                Universal construction monitoring platform for planning, measurement, and execution.
+                Universal construction monitoring platform for planning,
+                measurement, and execution.
               </p>
               {/* Social icons */}
               <div className="flex gap-3">
@@ -117,16 +117,16 @@ const Footer = () => {
           >
             {/* Globe Label */}
             <span className="text-xs uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-2">
-              Nationwide Coverage
+              Around the Globe Coverage
             </span>
-            
+
             {/* Globe Container - Larger size to prevent edge clipping */}
             <div className="w-64 h-64 relative overflow-visible">
               <Canvas
                 camera={{ position: [0, 0, 6.5], fov: 35 }}
                 dpr={[1, 1.5]}
                 gl={{ antialias: true, alpha: true }}
-                style={{ width: '100%', height: '100%', overflow: 'visible' }}
+                style={{ width: "100%", height: "100%", overflow: "visible" }}
               >
                 <Suspense fallback={null}>
                   <ambientLight intensity={0.3} />
@@ -134,7 +134,7 @@ const Footer = () => {
                   <Globe isDark={isDark} />
                 </Suspense>
               </Canvas>
-              
+
               {/* Glow effect behind globe */}
               <div className="absolute inset-6 -z-10 bg-gradient-to-br from-emerald-500/10 via-blue-500/10 to-purple-500/10 rounded-full blur-xl" />
             </div>
@@ -142,12 +142,16 @@ const Footer = () => {
             {/* Stats below globe */}
             <div className="flex gap-8 mt-3">
               <div className="text-center">
-                <div className="text-lg font-bold text-gray-800 dark:text-white">500+</div>
+                <div className="text-lg font-bold text-gray-800 dark:text-white">
+                  500+
+                </div>
                 <div className="text-xs text-gray-500">Projects</div>
               </div>
               <div className="w-px bg-gray-300 dark:bg-gray-700" />
               <div className="text-center">
-                <div className="text-lg font-bold text-gray-800 dark:text-white">28</div>
+                <div className="text-lg font-bold text-gray-800 dark:text-white">
+                  28
+                </div>
                 <div className="text-xs text-gray-500">States</div>
               </div>
             </div>
