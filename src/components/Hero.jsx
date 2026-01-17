@@ -131,8 +131,8 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-white/10 border border-white/30 backdrop-blur-sm">
-            <span className="text-white text-sm font-medium tracking-wide">
+          <div className="inline-flex items-center gap-3 px-6 py-2 rounded-2xl bg-gradient-to-r from-amber-500/80 via-orange-500/80 to-red-500/80 border-2 border-white/40 backdrop-blur-md shadow-[0_0_30px_rgba(245,158,11,0.5)] ">
+            <span className="text-white text-xl md:text-2xl font-bold tracking-wider uppercase drop-shadow-lg">
               To Achieve
             </span>
           </div>
