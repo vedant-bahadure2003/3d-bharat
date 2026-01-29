@@ -1,68 +1,75 @@
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle, FileX, Eye, Puzzle } from "lucide-react";
 import { Canvas } from "@react-three/fiber";
 import ChaosParticles from "./three/ChaosParticles";
+import { useTheme } from "../context/ThemeContext";
+
+// Move static data outside component to prevent recreation on each render
+const CHALLENGES = [
+  {
+    icon: AlertTriangle,
+    title: "Scattered Information",
+    description:
+      "Project data spread across multiple sources makes tracking daily work progress difficult and time-consuming.",
+  },
+  {
+    icon: FileX,
+    title: "Delayed Decision-Making",
+    description:
+      "Without real-time visibility, critical decisions are often delayed, impacting project timelines and budgets.",
+  },
+  {
+    icon: Eye,
+    title: "Limited Visibility",
+    description:
+      "Site visits and paper reports provide incomplete snapshots, missing crucial details for comprehensive monitoring.",
+  },
+  {
+    icon: Puzzle,
+    title: "Fragmented Tools",
+    description:
+      "Relying on isolated digital tools doesn't provide a complete or reliable picture of actual progress.",
+  },
+];
 
 const Challenges = () => {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
-  const [isDark, setIsDark] = useState(true);
+  const { isDark } = useTheme(); // Use context instead of MutationObserver
+  const rafRef = useRef(null);
+  const sectionRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-  // Theme detection
+  // Visibility detection to pause Three.js when not in view
   useEffect(() => {
-    const checkTheme = () => {
-      setIsDark(document.documentElement.classList.contains("dark"));
-    };
-    checkTheme();
-
-    const observer = new MutationObserver(checkTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
 
-  // Mouse tracking
+  // Throttled mouse tracking with RAF
   useEffect(() => {
     const handleMouseMove = (e) => {
-      setMouse({
-        x: (e.clientX / window.innerWidth) * 2 - 1,
-        y: -(e.clientY / window.innerHeight) * 2 + 1,
+      if (rafRef.current) return;
+
+      rafRef.current = requestAnimationFrame(() => {
+        setMouse({
+          x: (e.clientX / window.innerWidth) * 2 - 1,
+          y: -(e.clientY / window.innerHeight) * 2 + 1,
+        });
+        rafRef.current = null;
       });
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
-
-  const challenges = [
-    {
-      icon: AlertTriangle,
-      title: "Scattered Information",
-      description:
-        "Project data spread across multiple sources makes tracking daily work progress difficult and time-consuming.",
-    },
-    {
-      icon: FileX,
-      title: "Delayed Decision-Making",
-      description:
-        "Without real-time visibility, critical decisions are often delayed, impacting project timelines and budgets.",
-    },
-    {
-      icon: Eye,
-      title: "Limited Visibility",
-      description:
-        "Site visits and paper reports provide incomplete snapshots, missing crucial details for comprehensive monitoring.",
-    },
-    {
-      icon: Puzzle,
-      title: "Fragmented Tools",
-      description:
-        "Relying on isolated digital tools doesn't provide a complete or reliable picture of actual progress.",
-    },
-  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -97,24 +104,33 @@ const Challenges = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="challenges"
       className="relative min-h-screen overflow-hidden transition-colors duration-500"
       style={{ perspective: "1000px" }}
     >
-      {/* Full-screen Three.js Canvas Background */}
-      <div className="absolute inset-0 z-0">
-        <Canvas
-          camera={{ position: [0, 0, 12], fov: 60 }}
-          gl={{ antialias: true, alpha: true }}
-          style={{ background: "transparent" }}
-        >
-          <Suspense fallback={null}>
-            <ambientLight intensity={0.3} />
-            <pointLight position={[10, 10, 10]} intensity={0.5} />
-            <ChaosParticles isDark={isDark} mouse={mouse} />
-          </Suspense>
-        </Canvas>
-      </div>
+      {/* Full-screen Three.js Canvas Background - Only render when visible */}
+      {isVisible && (
+        <div className="absolute inset-0 z-0">
+          <Canvas
+            camera={{ position: [0, 0, 12], fov: 60 }}
+            dpr={[1, 1.5]}
+            frameloop="demand"
+            gl={{ 
+              antialias: false, 
+              alpha: true,
+              powerPreference: "high-performance",
+            }}
+            style={{ background: "transparent" }}
+          >
+            <Suspense fallback={null}>
+              <ambientLight intensity={0.3} />
+              <pointLight position={[10, 10, 10]} intensity={0.5} />
+              <ChaosParticles isDark={isDark} mouse={mouse} />
+            </Suspense>
+          </Canvas>
+        </div>
+      )}
 
       {/* Gradient overlays for depth */}
       <div
@@ -178,7 +194,7 @@ const Challenges = () => {
             viewport={{ once: true, margin: "-50px" }}
             className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8"
           >
-            {challenges.map((challenge, index) => (
+            {CHALLENGES.map((challenge, index) => (
               <motion.div
                 key={index}
                 variants={cardVariants}

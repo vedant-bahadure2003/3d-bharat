@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Construction,
@@ -78,20 +78,40 @@ const About = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
 
-  // Preload all images on mount for smooth transitions
+  // Visibility detection to pause animation when not in view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Preload first 3 images initially, lazy load the rest
   useEffect(() => {
     const preloadImages = async () => {
-      const promises = sliderImages.map((image) => {
+      // Only preload first 3 images immediately
+      const initialImages = sliderImages.slice(0, 3);
+      const promises = initialImages.map((image) => {
         return new Promise((resolve) => {
           const img = new Image();
           img.src = image.src;
           img.onload = resolve;
-          img.onerror = resolve; // Continue even if image fails
+          img.onerror = resolve;
         });
       });
       await Promise.all(promises);
       setImagesLoaded(true);
+      
+      // Lazy load remaining images after initial load
+      sliderImages.slice(3).forEach((image) => {
+        const img = new Image();
+        img.src = image.src;
+      });
     };
     preloadImages();
   }, []);
@@ -112,12 +132,12 @@ const About = () => {
     setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
-  // Auto-play functionality
+  // Auto-play functionality - only when visible
   useEffect(() => {
-    if (!isAutoPlaying || !imagesLoaded) return;
+    if (!isAutoPlaying || !imagesLoaded || !isVisible) return;
     const interval = setInterval(nextSlide, 2000);
     return () => clearInterval(interval);
-  }, [isAutoPlaying, nextSlide, imagesLoaded]);
+  }, [isAutoPlaying, nextSlide, imagesLoaded, isVisible]);
 
   const useCases = [
     {
@@ -167,6 +187,7 @@ const About = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="about"
       className="section bg-stone-100 dark:bg-[#0a0a0a] relative overflow-hidden transition-colors duration-300"
     >

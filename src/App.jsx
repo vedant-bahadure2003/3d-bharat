@@ -1,16 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Challenges from "./components/Challenges";
 import About from "./components/About";
 import Features from "./components/Features";
-import Measurement from "./components/measurenment/Measurement";
-import Videos from "./components/videos/Videos";
 import Create from "./components/Create";
 import Enquiry from "./components/Enquiry";
 import Footer from "./components/Footer";
 import { ThemeProvider } from "./context/ThemeContext";
+
+// Lazy load heavy page components for better initial load performance
+const Measurement = lazy(() => import("./components/measurenment/Measurement"));
+const Videos = lazy(() => import("./components/videos/Videos"));
+
+// Loading fallback component
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-stone-100 dark:bg-black">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-600 dark:border-white"></div>
+  </div>
+);
 
 // Component to handle scrolling to hash sections
 const ScrollToHash = () => {
@@ -58,8 +67,16 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={<HomePage />} />
-              <Route path="/measurement" element={<Measurement />} />
-              <Route path="/videos" element={<Videos />} />
+              <Route path="/measurement" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Measurement />
+                </Suspense>
+              } />
+              <Route path="/videos" element={
+                <Suspense fallback={<PageLoader />}>
+                  <Videos />
+                </Suspense>
+              } />
             </Routes>
           </main>
           

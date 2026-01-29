@@ -9,7 +9,7 @@ const seededRandom = (seed) => {
 };
 
 // OPTIMIZED: Reduced particle count for better performance
-const PARTICLE_COUNT = 700;
+const PARTICLE_COUNT = 500;
 const FRAGMENT_COUNT = 15;
 const SPHERE_RADIUS = 8;
 

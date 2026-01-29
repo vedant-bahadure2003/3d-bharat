@@ -1,40 +1,12 @@
-import { useState, useEffect, Suspense, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
-import { motion, AnimatePresence } from "framer-motion";
-import PointCloudSphere from "./three/PointCloudSphere";
-import { useTheme } from "../context/ThemeContext";
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 
 const videos = ["/video/header-video1.mp4", "/video/header-video2.mp4"];
 
 const Hero = () => {
-  const [mouse, setMouse] = useState({ x: 0, y: 0 });
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const rafRef = useRef(null);
   const video1Ref = useRef(null);
   const video2Ref = useRef(null);
-  const { isDark } = useTheme();
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      // Throttle mouse updates using requestAnimationFrame
-      if (rafRef.current) return;
-
-      rafRef.current = requestAnimationFrame(() => {
-        setMouse({
-          x: (e.clientX / window.innerWidth) * 2 - 1,
-          y: -(e.clientY / window.innerHeight) * 2 + 1,
-        });
-        rafRef.current = null;
-      });
-    };
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, []);
 
   // Handle video end - switch to next video
   const handleVideoEnd = () => {
@@ -99,25 +71,6 @@ const Hero = () => {
         />
         {/* Dark overlay for better readability */}
         <div className="absolute inset-0 bg-black/30 dark:bg-black/60" />
-      </div>
-
-      {/* Three.js Canvas - pointer-events-none allows scrolling through */}
-      <div className="absolute inset-0 z-5 pointer-events-none mt-3">
-        <Canvas
-          camera={{ position: [0, 0, 6], fov: 60 }} 
-          dpr={[1, 1.5]}
-          frameloop="always"
-          gl={{
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance",
-          }}
-        >
-          {/* <Suspense fallback={null}>
-            <ambientLight intensity={0.5} />
-            <PointCloudSphere mouse={mouse} isDark={isDark} />
-          </Suspense> */}
-        </Canvas>
       </div>
 
       {/* Gradient overlays - dark for video readability */}

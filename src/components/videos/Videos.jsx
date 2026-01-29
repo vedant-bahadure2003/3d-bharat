@@ -15,14 +15,12 @@ import {
   Maximize2,
   SkipBack,
   SkipForward,
-  Box,
-  Square,
 } from "lucide-react";
 import VideosHeader from "./VideosHeader";
 
 const Videos = () => {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [railwaySubTab, setRailwaySubTab] = useState("2d"); // "3d" or "2d"
+
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -85,67 +83,7 @@ const Videos = () => {
   // Video data organized by categories
   // Sequence: Railway (2D then 3D) → Bridge → Road → Design → Material → Merger
   const videos = [
-    // Railway 2D Videos
-    {
-      id: 10,
-      category: "railway",
-      subCategory: "2d",
-      title: "2D Image Processing",
-      description: "Advanced 2D image processing and analysis for railway infrastructure",
-      thumbnail: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600",
-      url: "https://3dbharat.com/storage/videos/2d_image_processing.mp4",
-      duration: "4:00",
-    },
-    {
-      id: 11,
-      category: "railway",
-      subCategory: "2d",
-      title: "Micro Rail Track Analysis",
-      description: "Detailed micro-level rail track inspection and measurement analysis",
-      thumbnail: "https://images.unsplash.com/photo-1515165562839-978bbcf18277?w=600",
-      url: "https://3dbharat.com/storage/videos/micro_rail_track.mp4",
-      duration: "3:30",
-    },
-    {
-      id: 12,
-      category: "railway",
-      subCategory: "2d",
-      title: "Over Crowd Detection",
-      description: "AI-powered crowd density analysis for railway platform safety",
-      thumbnail: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=600",
-      url: "https://3dbharat.com/storage/videos/over_crowd.mp4",
-      duration: "2:45",
-    },
-    {
-      id: 13,
-      category: "railway",
-      subCategory: "2d",
-      title: "Hot Wheel Excel Detection",
-      description: "Thermal detection system for identifying overheated wheel bearings",
-      thumbnail: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?w=600",
-      url: "https://3dbharat.com/storage/videos/hot_wheel_excel_detection.mp4",
-      duration: "4:15",
-    },
-    {
-      id: 16,
-      category: "railway",
-      subCategory: "2d",
-      title: "Railway Infrastructure Survey 2",
-      description: "Extended survey of railway infrastructure with detailed measurements",
-      thumbnail: "https://images.unsplash.com/photo-1532105956626-9569c03602f6?w=600",
-      url: "https://3dbharat.com/storage/videos/Railway_2.mp4",
-      duration: "4:40",
-    },
-    {
-      id: 17,
-      category: "railway",
-      subCategory: "2d",
-      title: "Micro Rail Track 3",
-      description: "Advanced micro rail track analysis with precision measurements",
-      thumbnail: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600",
-      url: "https://3dbharat.com/storage/videos/micro_rail_3.mp4",
-      duration: "3:15",
-    },
+  
     // Railway 3D Videos
     {
       id: 4,
@@ -153,7 +91,6 @@ const Videos = () => {
       subCategory: "3d",
       title: "Track Section - Interchange Points",
       description: "3D visualization of track switching point angles and defect detection analysis",
-      thumbnail: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600",
       url: "https://3dbharat.com/storage/videos/track_section-intercheniging_point_&_cant_angle.mp4",
       duration: "5:10",
     },
@@ -163,7 +100,6 @@ const Videos = () => {
       subCategory: "3d",
       title: "Electrical Section - OHE Measurements",
       description: "3D overhead electrical equipment mask measurements and wire analysis",
-      thumbnail: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600",
       url: "https://3dbharat.com/storage/videos/railway_section-ohe_pole_&_wire_measurements.mp4",
       duration: "4:35",
     },
@@ -173,7 +109,6 @@ const Videos = () => {
       subCategory: "3d",
       title: "Station & Footover Bridge",
       description: "analysis of railway station and footover bridge infrastructure",
-      thumbnail: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600",
       url: "https://3dbharat.com/storage/videos/construction_&_infrastructure_section-platform_measurement.mp4",
       duration: "6:15",
     },
@@ -183,7 +118,6 @@ const Videos = () => {
       subCategory: "3d",
       title: "Construction & Infrastructure - Station",
       description: "3D visualization of station and footover bridge construction infrastructure",
-      thumbnail: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=600",
       url: "https://3dbharat.com/storage/videos/construction_and_infrastructure_section_-station&_footover_bridge.mp4",
       duration: "5:00",
     },
@@ -193,7 +127,6 @@ const Videos = () => {
       subCategory: "3d",
       title: "Electrical Section - OHE Mask",
       description: "3D overhead electrical equipment mask measurements and analysis",
-      thumbnail: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600",
       url: "https://3dbharat.com/storage/videos/electrical_section-ohe_mask_measurements.mp4",
       duration: "4:30",
     },
@@ -203,7 +136,6 @@ const Videos = () => {
       subCategory: "3d",
       title: "Track Section - Angle of Defect",
       description: "3D analysis of interchange points and angle of defect detection",
-      thumbnail: "https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600",
       url: "https://3dbharat.com/storage/videos/track_section-interchenging_points_angle_of_defect.mp4",
       duration: "4:45",
     },
@@ -213,7 +145,6 @@ const Videos = () => {
       category: "bridge",
       title: "Bridge Section - Full Measurements",
       description: "Height, width, length, span, and pillar dimension measurements",
-      thumbnail: "https://images.unsplash.com/photo-1545893835-abaa50cbe628?w=600",
       url: "https://3dbharat.com/storage/videos/bridge_section-height,width,length,span,pillar_dimension.mp4",
       duration: "5:40",
     },
@@ -223,7 +154,6 @@ const Videos = () => {
       category: "road",
       title: "Road Section - Defect Analysis",
       description: "Pothole detection, road height, and width measurement analysis",
-      thumbnail: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600",
       url: "https://3dbharat.com/storage/videos/road_section-potholes,road_height,width.mp4",
       duration: "4:50",
     },
@@ -232,7 +162,6 @@ const Videos = () => {
       category: "road",
       title: "Tollbooth Section",
       description: "Complete tollbooth infrastructure and lane measurement analysis",
-      thumbnail: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=600",
       url: "https://3dbharat.com/storage/videos/tollbooth_section.mp4",
       duration: "3:25",
     },
@@ -242,7 +171,6 @@ const Videos = () => {
       category: "design",
       title: "Road Construction Design",
       description: "Complete 3D visualization of road construction design process and layer planning",
-      thumbnail: "https://images.unsplash.com/photo-1590496793929-36417d3117de?w=600",
       url: "https://3dbharat.com/storage/videos/road_construction_design.mp4",
       duration: "3:45",
     },
@@ -252,7 +180,6 @@ const Videos = () => {
       category: "material",
       title: "Road Construction Material Filling",
       description: "Detailed analysis of material filling layers and volume calculations",
-      thumbnail: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=600",
       url: "https://3dbharat.com/storage/videos/road_construction_material_filling.mp4",
       duration: "4:20",
     },
@@ -262,33 +189,35 @@ const Videos = () => {
       category: "merger",
       title: "Merger Layer Visualization",
       description: "Multi-layer merging and integration for unified 3D infrastructure view",
-      thumbnail: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600",
       url: "https://3dbharat.com/storage/videos/merger_layer.mp4",
       duration: "2:55",
     },
+    // Tracking Videos
+    {
+      id: 21,
+      category: "road",
+      title: "Rolling GPS Tracking System",
+      description: "Roller simulation tracking with real-time GPS positioning and movement analysis",
+      url: "https://3dbharat.com/storage/videos/Roller_Simulation_Tracking.mp4",
+      duration: "3:00",
+    },
   ];
 
-  // Railway sub-tabs configuration
-  const railwaySubTabs = [
-    { id: "2d", label: "2D Video", icon: Square, count: videos.filter(v => v.category === "railway" && v.subCategory === "2d").length },
-    { id: "3d", label: "3D Video", icon: Box, count: videos.filter(v => v.category === "railway" && v.subCategory === "3d").length },
-  ];
+
 
   const categories = [
-    { id: "all", label: "All Videos", icon: Play, count: 19, color: "from-gray-500 to-gray-600" },
-    { id: "railway", label: "Railway", icon: Train, count: 14, color: "from-cyan-500 to-sky-500" },
-    { id: "bridge", label: "Bridge", icon: Building2, count: 1, color: "from-violet-500 to-purple-500" },
-    { id: "road", label: "Road", icon: Route, count: 2, color: "from-lime-500 to-green-500" },
-    { id: "design", label: "Design", icon: Palette, count: 1, color: "from-pink-500 to-rose-500" },
-    { id: "material", label: "Material", icon: Hammer, count: 1, color: "from-amber-500 to-orange-500" },
-    { id: "merger", label: "Merger Layer", icon: Layers, count: 1, color: "from-emerald-500 to-teal-500" },
+    { id: "all", label: "All Videos", icon: Play, count: videos.length, color: "from-gray-500 to-gray-600" },
+    { id: "railway", label: "Railway", icon: Train, count: videos.filter(v => v.category === "railway").length, color: "from-cyan-500 to-sky-500" },
+    { id: "bridge", label: "Bridge", icon: Building2, count: videos.filter(v => v.category === "bridge").length, color: "from-violet-500 to-purple-500" },
+    { id: "road", label: "Road", icon: Route, count: videos.filter(v => v.category === "road").length, color: "from-lime-500 to-green-500" },
+    { id: "design", label: "Design", icon: Palette, count: videos.filter(v => v.category === "design").length, color: "from-pink-500 to-rose-500" },
+    { id: "material", label: "Material", icon: Hammer, count: videos.filter(v => v.category === "material").length, color: "from-amber-500 to-orange-500" },
+    { id: "merger", label: "Merger Layer", icon: Layers, count: videos.filter(v => v.category === "merger").length, color: "from-emerald-500 to-teal-500" },
   ];
 
   const filteredVideos = activeCategory === "all" 
     ? videos 
-    : activeCategory === "railway"
-      ? videos.filter(v => v.category === "railway" && v.subCategory === railwaySubTab)
-      : videos.filter(v => v.category === activeCategory);
+    : videos.filter(v => v.category === activeCategory);
 
   const getCategoryColor = (categoryId) => {
     return categories.find(c => c.id === categoryId)?.color || "from-gray-500 to-gray-600";
@@ -401,43 +330,12 @@ const Videos = () => {
           ))}
         </motion.div>
 
-        {/* Railway Sub-Tabs */}
-        <AnimatePresence>
-          {activeCategory === "railway" && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -10, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="flex justify-center gap-3 mb-8"
-            >
-              {railwaySubTabs.map((tab) => (
-                <motion.button
-                  key={tab.id}
-                  onClick={() => setRailwaySubTab(tab.id)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-all duration-300 cursor-pointer ${
-                    railwaySubTab === tab.id
-                      ? "bg-gradient-to-r from-cyan-500 to-sky-500 text-white shadow-lg shadow-cyan-500/25"
-                      : "bg-white dark:bg-white/10 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-white/15"
-                  }`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
-                  <span className={`px-1.5 py-0.5 rounded-md text-xs ${railwaySubTab === tab.id ? "bg-white/20" : "bg-black/5 dark:bg-white/10"}`}>
-                    {tab.count}
-                  </span>
-                </motion.button>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* Video Grid */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={`${activeCategory}-${railwaySubTab}`}
+            key={activeCategory}
             variants={containerVariants}
             initial="hidden"
             animate="visible"

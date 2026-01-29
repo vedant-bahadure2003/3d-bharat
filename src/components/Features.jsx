@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Layers,
@@ -18,6 +18,8 @@ const Features = () => {
   const { isDark } = useTheme();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [workflowSlideIndex, setWorkflowSlideIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
 
   const designLayerImages = [
     {
@@ -50,23 +52,27 @@ const Features = () => {
     },
   ];
 
-  // Auto-cycle through design layer images every 2 seconds
+  // Visibility detection to pause animations when not in view
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Combined interval for both slideshows - only runs when visible
+  useEffect(() => {
+    if (!isVisible) return;
+    
     const interval = setInterval(() => {
       setActiveImageIndex((prev) => (prev + 1) % designLayerImages.length);
+      setWorkflowSlideIndex((prev) => (prev + 1) % 2);
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [designLayerImages.length]);
-
-  // Auto-cycle workflow card slideshows every 1.5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setWorkflowSlideIndex((prev) => (prev + 1) % 2);
-    }, 1500);
-
-    return () => clearInterval(interval);
-  }, []);
+  }, [isVisible, designLayerImages.length]);
 
   const designLayers = [
     {
@@ -162,6 +168,7 @@ const Features = () => {
 
   return (
     <section
+      ref={sectionRef}
       id="features"
       className="section bg-stone-50 dark:bg-[#0a0a0a] relative overflow-hidden transition-colors duration-300"
     >
