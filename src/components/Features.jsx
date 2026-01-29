@@ -389,6 +389,7 @@ const Features = () => {
                   src="/images/merger 2.png"
                   alt="Merger Layer Visualization - Combined 3D Design Layers"
                   className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  loading="lazy"
                 />
 
                 {/* Bottom status bar */}

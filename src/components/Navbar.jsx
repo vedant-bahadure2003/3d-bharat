@@ -47,7 +47,10 @@ const Navbar = () => {
             <span className="text-2xl font-bold tracking-tight text-gray-800 dark:text-white">
               <img
                 src={scrolled ? (isDark ? "/images/logo.png" : "/images/logo2.png") : "/images/logo.png"}
-                className="w-32 h-32 "
+                alt="3D Bharat - Precise Work Progress Monitoring"
+                className="w-32 h-32"
+                width="128"
+                height="128"
               />{" "}
             </span>
           </motion.a>

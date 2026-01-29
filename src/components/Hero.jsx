@@ -48,23 +48,25 @@ const Hero = () => {
     >
       {/* Video Background - Dual video crossfade for smooth transitions */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-black">
-        {/* Video 1 */}
+        {/* Video 1 - Primary video with auto preload for LCP */}
         <video
           ref={video1Ref}
           src={videos[0]}
           autoPlay
           muted
           playsInline
+          preload="auto"
           onEnded={handleVideoEnd}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out"
           style={{ opacity: currentVideoIndex === 0 ? 1 : 0 }}
         />
-        {/* Video 2 */}
+        {/* Video 2 - Secondary video with metadata preload */}
         <video
           ref={video2Ref} 
           src={videos[1]}
           muted
           playsInline
+          preload="metadata"
           onEnded={handleVideoEnd}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out"
           style={{ opacity: currentVideoIndex === 1 ? 1 : 0 }}

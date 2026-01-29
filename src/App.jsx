@@ -64,7 +64,7 @@ function App() {
           <Navbar />
           
           {/* Page Content */}
-          <main>
+          <main id="main-content">
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/measurement" element={
