@@ -2,6 +2,7 @@ import { useEffect, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
+import OfficialVideoSection from "./components/OfficialVideoSection";
 import Challenges from "./components/Challenges";
 import About from "./components/About";
 import Features from "./components/Features";
@@ -45,6 +46,7 @@ const HomePage = () => {
   return (
     <>
       <Hero />
+      <OfficialVideoSection />
       <About />
       <Challenges />
       <Features />

@@ -1,19 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import VideoShowcase from "./VideoShowcase";
 
-const videos = ["/video/header-video1.mp4", "/video/header-video2.mp4"];
+const backgroundVideos = ["/video/header-video1.mp4", "/video/header-video2.mp4"];
 
 const Hero = () => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const video1Ref = useRef(null);
   const video2Ref = useRef(null);
 
-  // Handle video end - switch to next video
+  // Handle background video end - switch to next video
   const handleVideoEnd = () => {
-    setCurrentVideoIndex((prev) => (prev + 1) % videos.length);
+    setCurrentVideoIndex((prev) => (prev + 1) % backgroundVideos.length);
   };
 
-  // Play the current video and pause the other
+  // Play the current background video and pause the other
   useEffect(() => {
     if (currentVideoIndex === 0) {
       if (video1Ref.current) {
@@ -34,7 +35,7 @@ const Hero = () => {
     }
   }, [currentVideoIndex]);
 
-  // Preload video 2 on mount
+  // Preload background video 2 on mount
   useEffect(() => {
     if (video2Ref.current) {
       video2Ref.current.load();
@@ -51,7 +52,7 @@ const Hero = () => {
         {/* Video 1 - Primary video with auto preload for LCP */}
         <video
           ref={video1Ref}
-          src={videos[0]}
+          src={backgroundVideos[0]}
           autoPlay
           muted
           playsInline
@@ -63,7 +64,7 @@ const Hero = () => {
         {/* Video 2 - Secondary video with metadata preload */}
         <video
           ref={video2Ref} 
-          src={videos[1]}
+          src={backgroundVideos[1]}
           muted
           playsInline
           preload="metadata"
@@ -133,8 +134,12 @@ const Hero = () => {
           </motion.a>
         </motion.div>
       </div>
+
+      {/* Video Showcase - Fixed Position Component */}
+      <VideoShowcase />
     </section>
   );
 };
 
 export default Hero;
+
