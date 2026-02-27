@@ -38,7 +38,7 @@ const Videos = () => {
     if (!timeInSeconds || isNaN(timeInSeconds)) return "0:00";
     const minutes = Math.floor(timeInSeconds / 60);
     const seconds = Math.floor(timeInSeconds % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   // Handle video time update
@@ -61,10 +61,14 @@ const Videos = () => {
 
   // Handle card video metadata loaded (for duration display)
   const handleCardMetadataLoaded = (videoId, videoElement) => {
-    if (videoElement && videoElement.duration && !isNaN(videoElement.duration)) {
-      setVideoDurations(prev => ({
+    if (
+      videoElement &&
+      videoElement.duration &&
+      !isNaN(videoElement.duration)
+    ) {
+      setVideoDurations((prev) => ({
         ...prev,
-        [videoId]: formatTime(videoElement.duration)
+        [videoId]: formatTime(videoElement.duration),
       }));
     }
   };
@@ -83,14 +87,14 @@ const Videos = () => {
   // Video data organized by categories
   // Sequence: Railway (2D then 3D) → Bridge → Road → Design → Material → Merger
   const videos = [
-  
     // Railway 3D Videos
     {
       id: 4,
       category: "railway",
       subCategory: "3d",
       title: "Track Section - Interchange Points",
-      description: "3D visualization of track switching point angles and defect detection analysis",
+      description:
+        "3D visualization of track switching point angles and defect detection analysis",
       url: "https://3dbharat.com/storage/videos/track_section-intercheniging_point_&_cant_angle.mp4",
       duration: "5:10",
     },
@@ -99,7 +103,8 @@ const Videos = () => {
       category: "railway",
       subCategory: "3d",
       title: "Electrical Section - OHE Measurements",
-      description: "3D overhead electrical equipment mask measurements and wire analysis",
+      description:
+        "3D overhead electrical equipment mask measurements and wire analysis",
       url: "https://3dbharat.com/storage/videos/railway_section-ohe_pole_&_wire_measurements.mp4",
       duration: "4:35",
     },
@@ -108,7 +113,8 @@ const Videos = () => {
       category: "railway",
       subCategory: "3d",
       title: "Station & Footover Bridge",
-      description: "analysis of railway station and footover bridge infrastructure",
+      description:
+        "analysis of railway station and footover bridge infrastructure",
       url: "https://3dbharat.com/storage/videos/construction_&_infrastructure_section-platform_measurement.mp4",
       duration: "6:15",
     },
@@ -117,7 +123,8 @@ const Videos = () => {
       category: "railway",
       subCategory: "3d",
       title: "Construction & Infrastructure - Station",
-      description: "3D visualization of station and footover bridge construction infrastructure",
+      description:
+        "3D visualization of station and footover bridge construction infrastructure",
       url: "https://3dbharat.com/storage/videos/construction_and_infrastructure_section_-station&_footover_bridge.mp4",
       duration: "5:00",
     },
@@ -126,7 +133,8 @@ const Videos = () => {
       category: "railway",
       subCategory: "3d",
       title: "Electrical Section - OHE Mask",
-      description: "3D overhead electrical equipment mask measurements and analysis",
+      description:
+        "3D overhead electrical equipment mask measurements and analysis",
       url: "https://3dbharat.com/storage/videos/electrical_section-ohe_mask_measurements.mp4",
       duration: "4:30",
     },
@@ -135,7 +143,8 @@ const Videos = () => {
       category: "railway",
       subCategory: "3d",
       title: "Track Section - Angle of Defect",
-      description: "3D analysis of interchange points and angle of defect detection",
+      description:
+        "3D analysis of interchange points and angle of defect detection",
       url: "https://3dbharat.com/storage/videos/track_section-interchenging_points_angle_of_defect.mp4",
       duration: "4:45",
     },
@@ -144,24 +153,45 @@ const Videos = () => {
       id: 7,
       category: "bridge",
       title: "Bridge Section - Full Measurements",
-      description: "Height, width, length, span, and pillar dimension measurements",
+      description:
+        "Height, width, length, span, and pillar dimension measurements",
       url: "https://3dbharat.com/storage/videos/bridge_section-height,width,length,span,pillar_dimension.mp4",
       duration: "5:40",
+    },
+    {
+      id: 22,
+      category: "bridge",
+      title: "Bridge Inspection & Mapping",
+      description:
+        "Comprehensive bridge inspection and 3D measurement workflow — span, piller, and deck analysis with point-cloud based mapping.",
+      url: "https://3dbharat.miscos.in/storage/videos/Bridge_Video.mp4",
+      duration: "4:20",
     },
     // Road Videos
     {
       id: 8,
       category: "road",
       title: "Road Section - Defect Analysis",
-      description: "Pothole detection, road height, and width measurement analysis",
+      description:
+        "Pothole detection, road height, and width measurement analysis",
       url: "https://3dbharat.com/storage/videos/road_section-potholes,road_height,width.mp4",
       duration: "4:50",
+    },
+    {
+      id: 23,
+      category: "road",
+      title: "Road Asset Mapping",
+      description:
+        "Asset mapping for road infrastructure — signage, markings and asset mapping street light signal pole on lane.",
+      url: "https://3dbharat.miscos.in/storage/videos/Asset_Mapping_Video.mp4",
+      duration: "3:50",
     },
     {
       id: 9,
       category: "road",
       title: "Tollbooth Section",
-      description: "Complete tollbooth infrastructure and lane measurement analysis",
+      description:
+        "Complete tollbooth infrastructure and lane measurement analysis",
       url: "https://3dbharat.com/storage/videos/tollbooth_section.mp4",
       duration: "3:25",
     },
@@ -170,7 +200,8 @@ const Videos = () => {
       id: 1,
       category: "design",
       title: "Road Construction Design",
-      description: "Complete 3D visualization of road construction design process and layer planning",
+      description:
+        "Complete 3D visualization of road construction design process and layer planning",
       url: "https://3dbharat.com/storage/videos/road_construction_design.mp4",
       duration: "3:45",
     },
@@ -179,7 +210,8 @@ const Videos = () => {
       id: 2,
       category: "material",
       title: "Road Construction Material Filling",
-      description: "Detailed analysis of material filling layers and volume calculations",
+      description:
+        "Detailed analysis of material filling layers and volume calculations",
       url: "https://3dbharat.com/storage/videos/road_construction_material_filling.mp4",
       duration: "4:20",
     },
@@ -188,7 +220,8 @@ const Videos = () => {
       id: 3,
       category: "merger",
       title: "Merger Layer Visualization",
-      description: "Multi-layer merging and integration for unified 3D infrastructure view",
+      description:
+        "Multi-layer merging and integration for unified 3D infrastructure view",
       url: "https://3dbharat.com/storage/videos/merger_layer.mp4",
       duration: "2:55",
     },
@@ -197,30 +230,75 @@ const Videos = () => {
       id: 21,
       category: "road",
       title: "Rolling GPS Tracking System",
-      description: "Roller simulation tracking with real-time GPS positioning and movement analysis",
+      description:
+        "Roller simulation tracking with real-time GPS positioning and movement analysis",
       url: "https://3dbharat.com/storage/videos/Roller_Simulation_Tracking.mp4",
       duration: "3:00",
     },
   ];
 
-
-
   const categories = [
-    { id: "all", label: "All Videos", icon: Play, count: videos.length, color: "from-gray-500 to-gray-600" },
-    { id: "railway", label: "Railway", icon: Train, count: videos.filter(v => v.category === "railway").length, color: "from-cyan-500 to-sky-500" },
-    { id: "bridge", label: "Bridge", icon: Building2, count: videos.filter(v => v.category === "bridge").length, color: "from-violet-500 to-purple-500" },
-    { id: "road", label: "Road", icon: Route, count: videos.filter(v => v.category === "road").length, color: "from-lime-500 to-green-500" },
-    { id: "design", label: "Design", icon: Palette, count: videos.filter(v => v.category === "design").length, color: "from-pink-500 to-rose-500" },
-    { id: "material", label: "Material", icon: Hammer, count: videos.filter(v => v.category === "material").length, color: "from-amber-500 to-orange-500" },
-    { id: "merger", label: "Merger Layer", icon: Layers, count: videos.filter(v => v.category === "merger").length, color: "from-emerald-500 to-teal-500" },
+    {
+      id: "all",
+      label: "All Videos",
+      icon: Play,
+      count: videos.length,
+      color: "from-gray-500 to-gray-600",
+    },
+    {
+      id: "railway",
+      label: "Railway",
+      icon: Train,
+      count: videos.filter((v) => v.category === "railway").length,
+      color: "from-cyan-500 to-sky-500",
+    },
+    {
+      id: "bridge",
+      label: "Bridge",
+      icon: Building2,
+      count: videos.filter((v) => v.category === "bridge").length,
+      color: "from-violet-500 to-purple-500",
+    },
+    {
+      id: "road",
+      label: "Road",
+      icon: Route,
+      count: videos.filter((v) => v.category === "road").length,
+      color: "from-lime-500 to-green-500",
+    },
+    {
+      id: "design",
+      label: "Design",
+      icon: Palette,
+      count: videos.filter((v) => v.category === "design").length,
+      color: "from-pink-500 to-rose-500",
+    },
+    {
+      id: "material",
+      label: "Material",
+      icon: Hammer,
+      count: videos.filter((v) => v.category === "material").length,
+      color: "from-amber-500 to-orange-500",
+    },
+    {
+      id: "merger",
+      label: "Merger Layer",
+      icon: Layers,
+      count: videos.filter((v) => v.category === "merger").length,
+      color: "from-emerald-500 to-teal-500",
+    },
   ];
 
-  const filteredVideos = activeCategory === "all" 
-    ? videos 
-    : videos.filter(v => v.category === activeCategory);
+  const filteredVideos =
+    activeCategory === "all"
+      ? videos
+      : videos.filter((v) => v.category === activeCategory);
 
   const getCategoryColor = (categoryId) => {
-    return categories.find(c => c.id === categoryId)?.color || "from-gray-500 to-gray-600";
+    return (
+      categories.find((c) => c.id === categoryId)?.color ||
+      "from-gray-500 to-gray-600"
+    );
   };
 
   const handleVideoClick = (video) => {
@@ -257,26 +335,38 @@ const Videos = () => {
   const toggleFullscreen = () => {
     if (videoContainerRef.current) {
       if (!document.fullscreenElement) {
-        videoContainerRef.current.requestFullscreen().then(() => {
-          setIsFullscreen(true);
-        }).catch(err => console.log(err));
+        videoContainerRef.current
+          .requestFullscreen()
+          .then(() => {
+            setIsFullscreen(true);
+          })
+          .catch((err) => console.log(err));
       } else {
-        document.exitFullscreen().then(() => {
-          setIsFullscreen(false);
-        }).catch(err => console.log(err));
+        document
+          .exitFullscreen()
+          .then(() => {
+            setIsFullscreen(false);
+          })
+          .catch((err) => console.log(err));
       }
     }
   };
 
   const skipBackward = () => {
     if (videoRef.current) {
-      videoRef.current.currentTime = Math.max(0, videoRef.current.currentTime - 10);
+      videoRef.current.currentTime = Math.max(
+        0,
+        videoRef.current.currentTime - 10,
+      );
     }
   };
 
   const skipForward = () => {
     if (videoRef.current) {
-      videoRef.current.currentTime = Math.min(videoRef.current.duration, videoRef.current.currentTime + 10);
+      videoRef.current.currentTime = Math.min(
+        videoRef.current.duration,
+        videoRef.current.currentTime + 10,
+      );
     }
   };
 
@@ -287,11 +377,11 @@ const Videos = () => {
 
   const cardVariants = {
     hidden: { opacity: 0, y: 40, scale: 0.95 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    visible: {
+      opacity: 1,
+      y: 0,
       scale: 1,
-      transition: { duration: 0.5, ease: "easeOut" } 
+      transition: { duration: 0.5, ease: "easeOut" },
     },
   };
 
@@ -303,7 +393,7 @@ const Videos = () => {
       {/* Content Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Category Filter Tabs */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -323,14 +413,14 @@ const Videos = () => {
             >
               <cat.icon className="w-4 h-4" />
               <span>{cat.label}</span>
-              <span className={`px-2 py-0.5 rounded-lg text-xs ${activeCategory === cat.id ? "bg-white/20" : "bg-black/5 dark:bg-white/10"}`}>
+              <span
+                className={`px-2 py-0.5 rounded-lg text-xs ${activeCategory === cat.id ? "bg-white/20" : "bg-black/5 dark:bg-white/10"}`}
+              >
                 {cat.count}
               </span>
             </motion.button>
           ))}
         </motion.div>
-
-
 
         {/* Video Grid */}
         <AnimatePresence mode="wait">
@@ -358,24 +448,28 @@ const Videos = () => {
                     muted
                     preload="metadata"
                     playsInline
-                    onLoadedMetadata={(e) => handleCardMetadataLoaded(video.id, e.target)}
+                    onLoadedMetadata={(e) =>
+                      handleCardMetadataLoaded(video.id, e.target)
+                    }
                   />
-                  
+
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-                  
+
                   {/* Company Logo Watermark - Small Size for Cards */}
                   <div className="absolute bottom-2 right-2 z-10">
                     <img
                       src="/images/mtss_logo_2.png"
                       alt="MTSS Logo"
                       className="w-12 h-auto opacity-80 drop-shadow-lg"
-                      style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}
+                      style={{
+                        filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.5))",
+                      }}
                     />
                   </div>
-                  
+
                   {/* Play Button */}
-                  <motion.div 
+                  <motion.div
                     className="absolute inset-0 flex items-center justify-center"
                     initial={{ opacity: 0.8 }}
                     whileHover={{ opacity: 1 }}
@@ -395,8 +489,12 @@ const Videos = () => {
                   </div>
 
                   {/* Category Badge */}
-                  <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-lg bg-gradient-to-r ${getCategoryColor(video.category)} text-white text-xs font-semibold shadow-lg capitalize`}>
-                    {video.category === "merger" ? "Merger Layer" : video.category}
+                  <div
+                    className={`absolute top-4 left-4 px-3 py-1.5 rounded-lg bg-gradient-to-r ${getCategoryColor(video.category)} text-white text-xs font-semibold shadow-lg capitalize`}
+                  >
+                    {video.category === "merger"
+                      ? "Merger Layer"
+                      : video.category}
                   </div>
                 </div>
 
@@ -411,7 +509,9 @@ const Videos = () => {
                 </div>
 
                 {/* Bottom Glow Effect */}
-                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${getCategoryColor(video.category)} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                <div
+                  className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${getCategoryColor(video.category)} opacity-0 group-hover:opacity-100 transition-opacity`}
+                />
               </motion.div>
             ))}
           </motion.div>
@@ -424,7 +524,9 @@ const Videos = () => {
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
-            <p className="text-gray-500 dark:text-gray-400 text-lg">No videos found in this category.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-lg">
+              No videos found in this category.
+            </p>
           </motion.div>
         )}
       </div>
@@ -448,8 +550,8 @@ const Videos = () => {
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close Button */}
-              <motion.button 
-                onClick={closeModal} 
+              <motion.button
+                onClick={closeModal}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 className="absolute -top-14 right-0 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all z-20"
@@ -458,14 +560,14 @@ const Videos = () => {
               </motion.button>
 
               {/* Video Player Container */}
-              <div 
+              <div
                 ref={videoContainerRef}
-                className={`relative rounded-2xl overflow-hidden bg-black shadow-2xl ${isFullscreen ? 'flex items-center justify-center' : ''}`}
+                className={`relative rounded-2xl overflow-hidden bg-black shadow-2xl ${isFullscreen ? "flex items-center justify-center" : ""}`}
               >
                 <video
                   ref={videoRef}
                   src={selectedVideo.url}
-                  className={`w-full object-contain ${isFullscreen ? 'max-h-screen' : 'max-h-[60vh]'}`}
+                  className={`w-full object-contain ${isFullscreen ? "max-h-screen" : "max-h-[60vh]"}`}
                   onClick={togglePlay}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
@@ -475,24 +577,26 @@ const Videos = () => {
                 />
 
                 {/* Company Logo Watermark - Responsive sizing for modal and fullscreen */}
-                <div className={`absolute z-10 pointer-events-none ${isFullscreen ? 'bottom-28 right-6' : 'bottom-24 right-4'}`}>
+                <div
+                  className={`absolute z-10 pointer-events-none ${isFullscreen ? "bottom-28 right-6" : "bottom-24 right-4"}`}
+                >
                   <img
                     src="/images/mtss_logo_2.png"
                     alt="MTSS Logo"
-                    className={`h-auto opacity-75 ${isFullscreen ? 'w-32 md:w-40' : 'w-20 md:w-24'}`}
-                    style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.6))' }}
+                    className={`h-auto opacity-75 ${isFullscreen ? "w-32 md:w-40" : "w-20 md:w-24"}`}
+                    style={{ filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.6))" }}
                   />
                 </div>
 
                 {/* Video Controls Overlay */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
                   {/* Progress Bar */}
-                  <div 
+                  <div
                     ref={progressBarRef}
                     className="w-full h-2 bg-white/20 rounded-full mb-4 cursor-pointer group/progress"
                     onClick={handleProgressClick}
                   >
-                    <div 
+                    <div
                       className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full relative transition-all"
                       style={{ width: `${progress}%` }}
                     >
@@ -518,7 +622,11 @@ const Videos = () => {
                         onClick={togglePlay}
                         className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-all"
                       >
-                        {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                        {isPlaying ? (
+                          <Pause className="w-5 h-5" />
+                        ) : (
+                          <Play className="w-5 h-5 ml-0.5" />
+                        )}
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.1 }}
@@ -535,14 +643,20 @@ const Videos = () => {
                         onClick={toggleMute}
                         className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-all"
                       >
-                        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                        {isMuted ? (
+                          <VolumeX className="w-4 h-4" />
+                        ) : (
+                          <Volume2 className="w-4 h-4" />
+                        )}
                       </motion.button>
-                      
+
                       {/* Time Display */}
                       <div className="ml-3 text-white text-sm font-medium tabular-nums">
                         <span>{formatTime(currentTime)}</span>
                         <span className="text-white/50 mx-1">/</span>
-                        <span className="text-white/70">{formatTime(duration)}</span>
+                        <span className="text-white/70">
+                          {formatTime(duration)}
+                        </span>
                       </div>
                     </div>
                     <motion.button
@@ -578,11 +692,19 @@ const Videos = () => {
 
               {/* Video Info */}
               <div className="mt-4 text-center">
-                <div className={`inline-block px-3 py-1 rounded-lg bg-gradient-to-r ${getCategoryColor(selectedVideo.category)} text-white text-xs font-semibold mb-2 capitalize`}>
-                  {selectedVideo.category === "merger" ? "Merger Layer" : selectedVideo.category}
+                <div
+                  className={`inline-block px-3 py-1 rounded-lg bg-gradient-to-r ${getCategoryColor(selectedVideo.category)} text-white text-xs font-semibold mb-2 capitalize`}
+                >
+                  {selectedVideo.category === "merger"
+                    ? "Merger Layer"
+                    : selectedVideo.category}
                 </div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-2">{selectedVideo.title}</h3>
-                <p className="text-gray-400 text-sm max-w-xl mx-auto line-clamp-2">{selectedVideo.description}</p>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-2">
+                  {selectedVideo.title}
+                </h3>
+                <p className="text-gray-400 text-sm max-w-xl mx-auto line-clamp-2">
+                  {selectedVideo.description}
+                </p>
               </div>
             </motion.div>
           </motion.div>

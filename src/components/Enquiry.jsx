@@ -99,14 +99,14 @@ const Enquiry = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            to: "info@microintegrated.in",
+            to: "contact@microintegrated.in",
             subject: `New Project Enquiry from ${formData.name} - ${
               formData.projectType || "General Enquiry"
             }`,
             html: emailHtml,
             from: '"3D Bharat Enquiry" ',
           }),
-        }
+        },
       );
 
       if (!response.ok) {

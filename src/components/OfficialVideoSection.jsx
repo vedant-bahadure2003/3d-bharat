@@ -3,73 +3,125 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Play, Pause, Volume2, VolumeX, Maximize2, X } from "lucide-react";
 
 const OfficialVideoSection = () => {
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showControls, setShowControls] = useState(true);
+  const [player, setPlayer] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [progress, setProgress] = useState(0);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+  const progressInterval = useRef(null);
 
-  const videoUrl = "https://3dbharat.com/storage/videos/3D_Bharat.mp4";
+  const videoId = "7ij2WXuIWGM";
 
-  // Auto-hide controls after 3 seconds of no interaction
+  // Load YouTube IFrame API
   useEffect(() => {
-    let timeout;
-    if (isPlaying && showControls) {
-      timeout = setTimeout(() => setShowControls(false), 3000);
+    // Check if API is already loaded
+    if (window.YT && window.YT.Player) {
+      initPlayer();
+      return;
     }
-    return () => clearTimeout(timeout);
-  }, [isPlaying, showControls]);
 
-  // Handle progress bar update
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    // Load the API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-    const handleTimeUpdate = () => {
-      const progress = (video.currentTime / video.duration) * 100;
-      setProgress(progress || 0);
+    // API ready callback
+    window.onYouTubeIframeAPIReady = () => {
+      initPlayer();
     };
+  }, []);
 
-    video.addEventListener("timeupdate", handleTimeUpdate);
-    return () => video.removeEventListener("timeupdate", handleTimeUpdate);
+  const initPlayer = () => {
+    const newPlayer = new window.YT.Player('youtube-player', {
+      videoId: videoId,
+      playerVars: {
+        autoplay: 1,
+        mute: 1,
+        loop: 1,
+        playlist: videoId,
+        controls: 0,
+        modestbranding: 1,
+        rel: 0,
+        showinfo: 0,
+        enablejsapi: 1,
+      },
+      events: {
+        onReady: (event) => {
+          setPlayer(event.target);
+          setIsPlaying(true);
+          startProgressTracking(event.target);
+        },
+        onStateChange: (event) => {
+          if (event.data === window.YT.PlayerState.PLAYING) {
+            setIsPlaying(true);
+            startProgressTracking(event.target);
+          } else if (event.data === window.YT.PlayerState.PAUSED) {
+            setIsPlaying(false);
+            stopProgressTracking();
+          }
+        },
+      },
+    });
+  };
+
+  const startProgressTracking = (playerInstance) => {
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+    }
+    progressInterval.current = setInterval(() => {
+      if (playerInstance && playerInstance.getCurrentTime) {
+        const currentTime = playerInstance.getCurrentTime();
+        const duration = playerInstance.getDuration();
+        if (duration > 0) {
+          setProgress((currentTime / duration) * 100);
+        }
+      }
+    }, 100);
+  };
+
+  const stopProgressTracking = () => {
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => stopProgressTracking();
   }, []);
 
   const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play().catch(() => {});
-      }
-      setIsPlaying(!isPlaying);
+    if (!player) return;
+    if (isPlaying) {
+      player.pauseVideo();
+    } else {
+      player.playVideo();
     }
   };
 
   const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
-
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-    if (!isFullscreen && videoRef.current) {
-      videoRef.current.play().catch(() => {});
-      setIsPlaying(true);
+    if (!player) return;
+    if (isMuted) {
+      player.unMute();
+      setIsMuted(false);
+    } else {
+      player.mute();
+      setIsMuted(true);
     }
   };
 
   const handleProgressClick = (e) => {
-    if (!videoRef.current) return;
+    if (!player) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const percentage = x / rect.width;
-    videoRef.current.currentTime = percentage * videoRef.current.duration;
+    const duration = player.getDuration();
+    player.seekTo(percentage * duration, true);
   };
 
   return (
@@ -144,8 +196,6 @@ const OfficialVideoSection = () => {
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.3 }}
             className="relative group max-w-5xl mx-auto"
-            onMouseEnter={() => setShowControls(true)}
-            onMouseMove={() => setShowControls(true)}
           >
             {/* Glow Effect Behind Video */}
             <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/30 via-orange-500/30 to-red-500/30 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
@@ -160,109 +210,72 @@ const OfficialVideoSection = () => {
 
               {/* Video Element */}
               <div className="relative aspect-video">
-                <video
-                  ref={videoRef}
-                  src={videoUrl}
-                  autoPlay
-                  muted={isMuted}
-                  loop
-                  playsInline
-                  preload="auto"
-                  className="w-full h-full object-cover"
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
+                {/* YouTube Player */}
+                <div
+                  id="youtube-player"
+                  className="w-full h-full"
                 />
 
-                {/* Play Button Overlay (when paused) */}
-                <AnimatePresence>
-                  {!isPlaying && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px]"
+                {/* Custom Controls Overlay - Always Visible */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Gradient overlay for controls visibility */}
+                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/80 to-transparent" />
+
+                  {/* Controls Bar */}
+                  <div className="absolute bottom-0 left-0 right-0 z-10 px-4 pb-4 pointer-events-auto">
+                    {/* Progress Bar */}
+                    <div
+                      className="w-full h-1.5 bg-white/20 rounded-full mb-4 cursor-pointer group/progress overflow-hidden"
+                      onClick={handleProgressClick}
                     >
+                      <motion.div
+                        className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-full relative"
+                        style={{ width: `${progress}%` }}
+                      >
+                        <span className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover/progress:opacity-100 transition-opacity shadow-lg" />
+                      </motion.div>
+                    </div>
+
+                    {/* Control Buttons */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={togglePlay}
+                          className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all"
+                        >
+                          {isPlaying ? (
+                            <Pause className="w-5 h-5 text-white" />
+                          ) : (
+                            <Play className="w-5 h-5 text-white ml-0.5" />
+                          )}
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={toggleMute}
+                          className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all"
+                        >
+                          {isMuted ? (
+                            <VolumeX className="w-5 h-5 text-white" />
+                          ) : (
+                            <Volume2 className="w-5 h-5 text-white" />
+                          )}
+                        </motion.button>
+                      </div>
+
                       <motion.button
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={togglePlay}
-                        className="relative group/btn"
+                        onClick={() => setIsFullscreen(true)}
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all"
                       >
-                        {/* Pulsing ring */}
-                        <span className="absolute inset-0 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 animate-ping opacity-30" />
-                        {/* Button */}
-                        <span className="relative flex items-center justify-center w-20 h-20 md:w-24 md:h-24 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 shadow-2xl shadow-orange-500/40">
-                          <Play className="w-8 h-8 md:w-10 md:h-10 text-white ml-1" fill="white" />
-                        </span>
+                        <Maximize2 className="w-5 h-5 text-white" />
                       </motion.button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                {/* Video Controls Overlay */}
-                <AnimatePresence>
-                  {showControls && isPlaying && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute inset-0 flex flex-col justify-end"
-                    >
-                      {/* Gradient overlay for controls visibility */}
-                      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/80 to-transparent" />
-
-                      {/* Controls Bar */}
-                      <div className="relative z-10 px-4 pb-4">
-                        {/* Progress Bar */}
-                        <div
-                          className="w-full h-1.5 bg-white/20 rounded-full mb-4 cursor-pointer group/progress overflow-hidden"
-                          onClick={handleProgressClick}
-                        >
-                          <motion.div
-                            className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-full relative"
-                            style={{ width: `${progress}%` }}
-                          >
-                            <span className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover/progress:opacity-100 transition-opacity shadow-lg" />
-                          </motion.div>
-                        </div>
-
-                        {/* Control Buttons */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={togglePlay}
-                              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all"
-                            >
-                              {isPlaying ? (
-                                <Pause className="w-5 h-5 text-white" />
-                              ) : (
-                                <Play className="w-5 h-5 text-white ml-0.5" />
-                              )}
-                            </button>
-                            <button
-                              onClick={toggleMute}
-                              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all"
-                            >
-                              {isMuted ? (
-                                <VolumeX className="w-5 h-5 text-white" />
-                              ) : (
-                                <Volume2 className="w-5 h-5 text-white" />
-                              )}
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={toggleFullscreen}
-                            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all"
-                          >
-                            <Maximize2 className="w-5 h-5 text-white" />
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </div>
+                  </div>
+                </div>
 
                 {/* 3D Bharat Branding */}
                 <div className="absolute top-4 left-4 z-20">
@@ -324,13 +337,12 @@ const OfficialVideoSection = () => {
               <X className="w-6 h-6 text-white" />
             </button>
 
-            <video
-              src={videoUrl}
-              autoPlay
-              loop
-              playsInline
-              controls
-              className="w-full h-full object-contain"
+            <iframe
+              src="https://www.youtube.com/embed/7ij2WXuIWGM?autoplay=1&controls=1&modestbranding=1&rel=0"
+              className="w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              title="3D Bharat Official Video - Fullscreen"
             />
           </motion.div>
         )}
