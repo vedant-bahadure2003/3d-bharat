@@ -1,5 +1,10 @@
 import { useEffect, Suspense, lazy } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import OfficialVideoSection from "./components/OfficialVideoSection";
@@ -10,10 +15,18 @@ import Create from "./components/Create";
 import Enquiry from "./components/Enquiry";
 import Footer from "./components/Footer";
 import { ThemeProvider } from "./context/ThemeContext";
+import {
+  RegistrationModalProvider,
+  useRegistrationModal,
+} from "./context/RegistrationModalContext";
+import RegistrationModal from "./components/RegistrationModal";
 
 // Lazy load heavy page components for better initial load performance
 const Measurement = lazy(() => import("./components/measurenment/Measurement"));
 const Videos = lazy(() => import("./components/videos/Videos"));
+const EducationDashboard = lazy(
+  () => import("./components/EducationDashboard"),
+);
 
 // Loading fallback component
 const PageLoader = () => (
@@ -56,37 +69,65 @@ const HomePage = () => {
   );
 };
 
-function App() {
+// Inner component that can access the registration modal context
+const AppContent = () => {
+  const { isOpen, closeModal } = useRegistrationModal();
   return (
-    <ThemeProvider>
-      <Router>
-        <ScrollToHash />
-        <div className="min-h-screen bg-stone-100 dark:bg-black text-gray-800 dark:text-white transition-colors duration-300">
-          {/* Shared Navbar */}
-          <Navbar />
-          
-          {/* Page Content */}
-          <main id="main-content">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/measurement" element={
+    <>
+      <div className="min-h-screen bg-stone-100 dark:bg-black text-gray-800 dark:text-white transition-colors duration-300">
+        {/* Shared Navbar */}
+        <Navbar />
+
+        {/* Page Content */}
+        <main id="main-content">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/measurement"
+              element={
                 <Suspense fallback={<PageLoader />}>
                   <Measurement />
                 </Suspense>
-              } />
-              <Route path="/videos" element={
+              }
+            />
+            <Route
+              path="/videos"
+              element={
                 <Suspense fallback={<PageLoader />}>
                   <Videos />
                 </Suspense>
-              } />
-            </Routes>
-          </main>
-          
-          {/* Shared Footer */}
-          
-          <Footer />
-        </div>
-      </Router>
+              }
+            />
+            <Route
+              path="/education"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <EducationDashboard />
+                </Suspense>
+              }
+            />
+          </Routes>
+        </main>
+
+        {/* Shared Footer */}
+
+        <Footer />
+      </div>
+      {/* Registration Modal */}
+      <RegistrationModal isOpen={isOpen} onClose={closeModal} />
+    </>
+  );
+};
+
+function App() {
+  return (
+    <ThemeProvider>
+      <RegistrationModalProvider>
+        <Router>
+          <ScrollToHash />
+          <AppContent />
+        </Router>
+      </RegistrationModalProvider>
     </ThemeProvider>
   );
 }

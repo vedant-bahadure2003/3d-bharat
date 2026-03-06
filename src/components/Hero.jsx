@@ -1,13 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import VideoShowcase from "./VideoShowcase";
+import { useRegistrationModal } from "../context/RegistrationModalContext";
 
-const backgroundVideos = ["/video/header-video1.mp4", "/video/header-video2.mp4"];
+const backgroundVideos = [
+  "/video/header-video1.mp4",
+  "/video/header-video2.mp4",
+];
 
 const Hero = () => {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const video1Ref = useRef(null);
   const video2Ref = useRef(null);
+  const { openModal } = useRegistrationModal();
 
   // Handle background video end - switch to next video
   const handleVideoEnd = () => {
@@ -63,7 +68,7 @@ const Hero = () => {
         />
         {/* Video 2 - Secondary video with metadata preload */}
         <video
-          ref={video2Ref} 
+          ref={video2Ref}
           src={backgroundVideos[1]}
           muted
           playsInline
@@ -93,7 +98,9 @@ const Hero = () => {
             </span>
           </div>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 leading-tight">
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500">Precise Work</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-500 to-red-500">
+              Precise Work
+            </span>
             <span className="block text-white drop-shadow-lg">
               Progress Monitoring
             </span>
@@ -116,22 +123,22 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <motion.a
-            href="#features"
+          <motion.button
+            onClick={openModal}
             className="btn-primary"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Explore Platform
-          </motion.a>
-          <motion.a
+            3D Education
+          </motion.button>
+          {/* <motion.a
             href="#challenges"
             className="px-8 py-4 border border-white/50 text-white rounded-xl font-medium hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Learn More
-          </motion.a>
+          </motion.a> */}
         </motion.div>
       </div>
 
@@ -142,4 +149,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

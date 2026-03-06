@@ -1,12 +1,18 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import { useTheme } from "../context/ThemeContext";
+import { useRegistrationModal } from "../context/RegistrationModalContext";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [trialsOpen, setTrialsOpen] = useState(false);
+  const [mobileTrialsOpen, setMobileTrialsOpen] = useState(false);
+  const trialsRef = useRef(null);
   const { isDark } = useTheme();
+  const { openModal } = useRegistrationModal();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +21,24 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (trialsRef.current && !trialsRef.current.contains(e.target)) {
+        setTrialsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const trialsDropdownItems = [
+    { name: "Road", href: "/measurement?category=road" },
+    { name: "Bridge", href: "/measurement?category=bridge" },
+    { name: "Railways", href: "/measurement?category=railway" },
+    { name: "Measurement", href: "/measurement" },
+  ];
 
   const navItems = [
     { name: "Home", href: "/" },
@@ -46,7 +70,13 @@ const Navbar = () => {
           >
             <span className="text-2xl font-bold tracking-tight text-gray-800 dark:text-white">
               <img
-                src={scrolled ? (isDark ? "/images/logo.png" : "/images/logo2.png") : "/images/logo.png"}
+                src={
+                  scrolled
+                    ? isDark
+                      ? "/images/logo.png"
+                      : "/images/logo2.png"
+                    : "/images/logo.png"
+                }
                 alt="3D Bharat - Precise Work Progress Monitoring"
                 className="w-32 h-32"
                 width="128"
@@ -61,7 +91,7 @@ const Navbar = () => {
               <motion.a
                 key={item.name}
                 href={item.href}
-                className={`text-sm font-medium transition-colors duration-300 tracking-wide ${scrolled ? 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white' : 'text-white/90 hover:text-white'}`}
+                className={`text-sm font-medium transition-colors duration-300 tracking-wide ${scrolled ? "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white" : "text-white/90 hover:text-white"}`}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.4 }}
@@ -71,12 +101,58 @@ const Navbar = () => {
               </motion.a>
             ))}
 
+            {/* Trials Dropdown */}
+            <div className="relative" ref={trialsRef}>
+              <motion.button
+                onClick={() => setTrialsOpen((prev) => !prev)}
+                className={`flex items-center gap-1 text-sm font-medium transition-colors duration-300 tracking-wide ${scrolled ? "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white" : "text-white/90 hover:text-white"}`}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: navItems.length * 0.1, duration: 0.4 }}
+                whileHover={{ y: -2 }}
+              >
+                Trials
+                <motion.span
+                  animate={{ rotate: trialsOpen ? 180 : 0 }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                >
+                  <ChevronDown size={14} />
+                </motion.span>
+              </motion.button>
+
+              <AnimatePresence>
+                {trialsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-44 rounded-xl overflow-hidden shadow-xl border bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-gray-200 dark:border-white/10"
+                  >
+                    {trialsDropdownItems.map((item, i) => (
+                      <motion.a
+                        key={item.name}
+                        href={item.href}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.05, duration: 0.2 }}
+                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors duration-150"
+                        onClick={() => setTrialsOpen(false)}
+                      >
+                        {item.name}
+                      </motion.a>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Theme Toggle */}
             <ThemeToggle />
 
             <motion.a
               href="/#enquiry"
-              className={`px-6 py-2.5 border rounded-lg text-sm font-medium transition-all duration-300 ${scrolled ? 'border-gray-400 dark:border-white/30 text-gray-700 dark:text-white hover:bg-gray-800 hover:text-white dark:hover:bg-white dark:hover:text-black' : 'border-white/50 text-white hover:bg-white/20'}`}
+              className={`px-6 py-2.5 border rounded-lg text-sm font-medium transition-all duration-300 ${scrolled ? "border-gray-400 dark:border-white/30 text-gray-700 dark:text-white hover:bg-gray-800 hover:text-white dark:hover:bg-white dark:hover:text-black" : "border-white/50 text-white hover:bg-white/20"}`}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.4 }}
@@ -96,17 +172,17 @@ const Navbar = () => {
             >
               <div className="w-6 h-5 flex flex-col justify-between">
                 <span
-                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? 'bg-gray-800 dark:bg-white' : 'bg-white'} ${
+                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? "bg-gray-800 dark:bg-white" : "bg-white"} ${
                     mobileMenuOpen ? "rotate-45 translate-y-2" : ""
                   }`}
                 />
                 <span
-                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? 'bg-gray-800 dark:bg-white' : 'bg-white'} ${
+                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? "bg-gray-800 dark:bg-white" : "bg-white"} ${
                     mobileMenuOpen ? "opacity-0" : ""
                   }`}
                 />
                 <span
-                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? 'bg-gray-800 dark:bg-white' : 'bg-white'} ${
+                  className={`w-full h-0.5 transition-all duration-300 ${scrolled ? "bg-gray-800 dark:bg-white" : "bg-white"} ${
                     mobileMenuOpen ? "-rotate-45 -translate-y-2" : ""
                   }`}
                 />
@@ -136,6 +212,48 @@ const Navbar = () => {
                 {item.name}
               </a>
             ))}
+
+            {/* Mobile Trials Dropdown */}
+            <div>
+              <button
+                onClick={() => setMobileTrialsOpen((prev) => !prev)}
+                className="flex items-center gap-1 w-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors py-2"
+              >
+                Trials
+                <motion.span
+                  animate={{ rotate: mobileTrialsOpen ? 180 : 0 }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                >
+                  <ChevronDown size={14} />
+                </motion.span>
+              </button>
+              <AnimatePresence>
+                {mobileTrialsOpen && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                    className="overflow-hidden pl-4"
+                  >
+                    {trialsDropdownItems.map((item) => (
+                      <a
+                        key={item.name}
+                        href={item.href}
+                        className="block text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors py-1.5 text-sm"
+                        onClick={() => {
+                          setMobileTrialsOpen(false);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        {item.name}
+                      </a>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <a
               href="/#enquiry"
               className="inline-block px-6 py-2.5 border border-gray-400 dark:border-white/30 rounded-lg text-sm font-medium
