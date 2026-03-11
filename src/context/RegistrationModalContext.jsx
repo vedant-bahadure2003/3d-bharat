@@ -14,13 +14,20 @@ export const useRegistrationModal = () => {
 
 export const RegistrationModalProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
-  const openModal = () => setIsOpen(true);
-  const closeModal = () => setIsOpen(false);
+  const openModal = (category = "") => {
+    setSelectedCategory(category);
+    setIsOpen(true);
+  };
+  const closeModal = () => {
+    setIsOpen(false);
+    setSelectedCategory("");
+  };
 
   return (
     <RegistrationModalContext.Provider
-      value={{ isOpen, openModal, closeModal }}
+      value={{ isOpen, openModal, closeModal, selectedCategory }}
     >
       {children}
     </RegistrationModalContext.Provider>

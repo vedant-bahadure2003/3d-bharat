@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -6,23 +6,38 @@ import {
   User,
   Mail,
   Phone,
-  Lock,
   Building2,
   GraduationCap,
   Briefcase,
   ChevronRight,
   ChevronLeft,
   Check,
-  Eye,
-  EyeOff,
   Calendar,
   Shield,
+  Copy,
+  Eye,
+  EyeOff,
+  PartyPopper,
+  Loader2,
+  Download,
 } from "lucide-react";
+import { registerUser, verifyOtp } from "../services/auth";
+import { useRegistrationModal } from "../context/RegistrationModalContext";
+
+// Category → download URL mapping
+const CATEGORY_DOWNLOADS = {
+  road: {
+    label: "Road Design",
+    filename: "3D%20Bharat%20Road%20Design%20Application_v1.0.0.zip",
+  },
+};
+
+const DOWNLOAD_BASE_URL = "https://edu.3dbharat.com/downloads/application";
 
 const STEPS = [
   { id: 1, label: "Personal" },
   { id: 2, label: "Role" },
-  { id: 3, label: "Security" },
+  { id: 3, label: "Requirements" },
   { id: 4, label: "Verify" },
 ];
 
@@ -36,10 +51,7 @@ const FloatingInput = ({
   error,
 }) => {
   const [focused, setFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === "password";
   const isDate = type === "date";
-  const inputType = isPassword ? (showPassword ? "text" : "password") : type;
   const hasValue = value && value.length > 0;
   const isFloating = focused || hasValue || isDate;
 
@@ -64,7 +76,7 @@ const FloatingInput = ({
         />
         <div className="relative flex-1 min-h-[24px] flex items-center">
           <input
-            type={inputType}
+            type={type}
             name={name}
             value={value}
             onChange={onChange}
@@ -91,20 +103,6 @@ const FloatingInput = ({
             {label}
           </label>
         </div>
-        {isPassword && (
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-            tabIndex={-1}
-          >
-            {showPassword ? (
-              <EyeOff className="w-4 h-4" />
-            ) : (
-              <Eye className="w-4 h-4" />
-            )}
-          </button>
-        )}
       </div>
       {error && (
         <motion.p
@@ -119,7 +117,7 @@ const FloatingInput = ({
   );
 };
 
-const OTPInput = ({ value, onChange, length = 6 }) => {
+const OTPInput = ({ value, onChange, length = 4 }) => {
   const inputRefs = useRef([]);
 
   const handleChange = (index, e) => {
@@ -179,23 +177,32 @@ const OTPInput = ({ value, onChange, length = 6 }) => {
 };
 
 const RegistrationModal = ({ isOpen, onClose }) => {
+  const { selectedCategory } = useRegistrationModal();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [otpSent, setOtpSent] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     dob: "",
     email: "",
     mobile: "",
-    password: "",
     role: "", // "student" or "industry"
     collegeName: "",
     universityName: "",
     designation: "",
     organizationName: "",
+    city: "",
     termsAccepted: false,
+    sendOtpOnWhatsapp: false,
     otp: "",
   });
   const [errors, setErrors] = useState({});
@@ -228,18 +235,26 @@ const RegistrationModal = ({ isOpen, onClose }) => {
         setDirection(1);
         setOtpSent(false);
         setOtpTimer(0);
+        setIsSubmitting(false);
+        setSubmitError("");
+        setRegistrationSuccess(false);
+        setGeneratedPassword("");
+        setShowPassword(false);
+        setCopied(false);
         setFormData({
-          fullName: "",
+          firstName: "",
+          lastName: "",
           dob: "",
           email: "",
           mobile: "",
-          password: "",
           role: "",
           collegeName: "",
           universityName: "",
           designation: "",
           organizationName: "",
+          city: "",
           termsAccepted: false,
+          sendOtpOnWhatsapp: false,
           otp: "",
         });
         setErrors({});
@@ -263,8 +278,10 @@ const RegistrationModal = ({ isOpen, onClose }) => {
   const validateStep = (currentStep) => {
     const newErrors = {};
     if (currentStep === 1) {
-      if (!formData.fullName.trim())
-        newErrors.fullName = "Full name is required";
+      if (!formData.firstName.trim())
+        newErrors.firstName = "First name is required";
+      if (!formData.lastName.trim())
+        newErrors.lastName = "Last name is required";
       if (!formData.dob) newErrors.dob = "Date of birth is required";
       if (!formData.email.trim()) newErrors.email = "Email is required";
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
@@ -288,14 +305,9 @@ const RegistrationModal = ({ isOpen, onClose }) => {
         if (!formData.organizationName.trim())
           newErrors.organizationName = "Organization name is required";
       }
+      if (!formData.city.trim()) newErrors.city = "City is required";
     }
-    if (currentStep === 3) {
-      if (!formData.password) newErrors.password = "Password is required";
-      else if (formData.password.length < 8)
-        newErrors.password = "Minimum 8 characters";
-      if (!formData.termsAccepted)
-        newErrors.termsAccepted = "You must accept the terms";
-    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -312,16 +324,78 @@ const RegistrationModal = ({ isOpen, onClose }) => {
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
-  const sendOTP = () => {
-    setOtpSent(true);
-    setOtpTimer(30);
+  const sendOTP = async () => {
+    if (!formData.termsAccepted) {
+      setErrors({ termsAccepted: "You must accept the terms & conditions" });
+      return;
+    }
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
+      const response = await registerUser(formData);
+      // Save password from register response — will show after OTP verification
+      const password =
+        response?.generated_password ||
+        response?.data?.generated_password ||
+        response?.password ||
+        response?.data?.password ||
+        response?.user_password ||
+        "";
+      setGeneratedPassword(password);
+      setOtpSent(true);
+      setOtpTimer(30);
+    } catch (error) {
+      setSubmitError(
+        error?.data?.message ||
+          error.message ||
+          "Registration failed. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSubmit = () => {
-    if (formData.otp.length === 6) {
-      onClose();
-      navigate("/education");
+
+
+  const handleSubmit = async () => {
+    const newErrors = {};
+    if (!formData.termsAccepted) {
+      newErrors.termsAccepted = "You must accept the terms & conditions";
     }
+    if (formData.otp.length < 4) {
+      newErrors.otp = "Please enter the complete verification code";
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
+    // Manual fallback — verify OTP and show password
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
+      await verifyOtp(formData.mobile, formData.otp);
+      setRegistrationSuccess(true);
+    } catch (error) {
+      setSubmitError(
+        error?.data?.message ||
+          error.message ||
+          "Invalid OTP. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const copyPassword = async () => {
+    if (generatedPassword) {
+      await navigator.clipboard.writeText(generatedPassword);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleSuccessClose = () => {
+    onClose();
+    navigate("/education");
   };
 
   const slideVariants = {
@@ -329,25 +403,6 @@ const RegistrationModal = ({ isOpen, onClose }) => {
     center: { x: 0, opacity: 1 },
     exit: (dir) => ({ x: dir > 0 ? -60 : 60, opacity: 0 }),
   };
-
-  const passwordStrength = (pwd) => {
-    let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[^A-Za-z0-9]/.test(pwd)) score++;
-    return score;
-  };
-
-  const strength = passwordStrength(formData.password);
-  const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
-  const strengthColors = [
-    "",
-    "bg-red-500",
-    "bg-orange-500",
-    "bg-amber-400",
-    "bg-green-500",
-  ];
 
   return (
     <AnimatePresence>
@@ -428,11 +483,10 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-gray-800 dark:text-white">
-                    3D Education
+                    3D Evaluation and Education
                   </h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    Join the future of construction learning
-                  </p>
+                  <p className="text-xs text-gray-800 dark:text-gray-400">
+This is a fully funtional demo for your kind evaluation and education purpose.Your valuable feedback is very much appreciated.       </p>
                 </div>
               </motion.div>
             </div>
@@ -496,14 +550,24 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="space-y-3"
                   >
-                    <FloatingInput
-                      icon={User}
-                      label="Full Name"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      error={errors.fullName}
-                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <FloatingInput
+                        icon={User}
+                        label="First Name"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        error={errors.firstName}
+                      />
+                      <FloatingInput
+                        icon={User}
+                        label="Last Name"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        error={errors.lastName}
+                      />
+                    </div>
                     <FloatingInput
                       icon={Calendar}
                       label="Date of Birth"
@@ -531,6 +595,33 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                       onChange={handleInputChange}
                       error={errors.mobile}
                     />
+                    <motion.a
+                      href="/manual.pdf"
+                      download
+                      className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-sm font-semibold
+                        text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-500/10
+                        border-2 border-amber-300 dark:border-amber-500/30
+                        hover:bg-amber-100 dark:hover:bg-amber-500/20
+                        transition-all duration-300 mt-1"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="7 10 12 15 17 10" />
+                        <line x1="12" y1="15" x2="12" y2="3" />
+                      </svg>
+                      Download Manual
+                    </motion.a>
                   </motion.div>
                 )}
 
@@ -588,7 +679,7 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                         <p
                           className={`font-semibold text-sm ${formData.role === "student" ? "text-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"}`}
                         >
-                          Student
+                          Education
                         </p>
                         <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
                           Academic learner
@@ -630,7 +721,7 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                         <p
                           className={`font-semibold text-sm ${formData.role === "industry" ? "text-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"}`}
                         >
-                          Industry
+                          Evaluation
                         </p>
                         <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-0.5">
                           Working professional
@@ -695,10 +786,28 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                         </motion.div>
                       )}
                     </AnimatePresence>
+
+                    {/* City field - shown for both roles */}
+                    {formData.role && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <FloatingInput
+                          icon={Building2}
+                          label="City"
+                          name="city"
+                          value={formData.city}
+                          onChange={handleInputChange}
+                          error={errors.city}
+                        />
+                      </motion.div>
+                    )}
                   </motion.div>
                 )}
 
-                {/* Step 3: Password & Terms */}
+                {/* Step 3: System Requirements */}
                 {step === 3 && (
                   <motion.div
                     key="step3"
@@ -708,149 +817,227 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                     animate="center"
                     exit="exit"
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="space-y-3"
+                    className="space-y-4"
                   >
-                    <FloatingInput
-                      icon={Lock}
-                      label="Create Password"
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      error={errors.password}
-                    />
-
-                    {/* Password strength meter */}
-                    {formData.password && (
+                    <div className="text-center space-y-2 mb-4">
                       <motion.div
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-2"
+                        className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 flex items-center justify-center shadow-xl shadow-amber-500/20"
+                        initial={{ rotate: -10 }}
+                        animate={{ rotate: 0 }}
+                        transition={{ type: "spring", stiffness: 200 }}
                       >
-                        <div className="flex gap-1.5">
-                          {[1, 2, 3, 4].map((i) => (
-                            <div
-                              key={i}
-                              className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                                strength >= i
-                                  ? strengthColors[strength]
-                                  : "bg-gray-200 dark:bg-white/10"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <p
-                          className={`text-xs font-medium ${
-                            strength <= 1
-                              ? "text-red-500"
-                              : strength === 2
-                                ? "text-orange-500"
-                                : strength === 3
-                                  ? "text-amber-500"
-                                  : "text-green-500"
-                          }`}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-7 h-7 text-white"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          {strengthLabels[strength]}
-                        </p>
+                          <rect x="2" y="3" width="20" height="14" rx="2" />
+                          <line x1="8" y1="21" x2="16" y2="21" />
+                          <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg>
                       </motion.div>
-                    )}
-
-                    {/* Password hints */}
-                    <div className="p-4 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10">
-                      <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">
-                        Password requirements:
+                      <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+                        System Requirements
+                      </h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        Ensure your system meets these minimum specifications to
+                        run the software
                       </p>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {[
-                          {
-                            text: "8+ characters",
-                            met: formData.password.length >= 8,
-                          },
-                          {
-                            text: "Uppercase letter",
-                            met: /[A-Z]/.test(formData.password),
-                          },
-                          {
-                            text: "Number",
-                            met: /[0-9]/.test(formData.password),
-                          },
-                          {
-                            text: "Special character",
-                            met: /[^A-Za-z0-9]/.test(formData.password),
-                          },
-                        ].map((req) => (
-                          <div
-                            key={req.text}
-                            className="flex items-center gap-1.5"
-                          >
-                            <div
-                              className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${
-                                req.met
-                                  ? "bg-green-500"
-                                  : "bg-gray-300 dark:bg-white/15"
-                              }`}
-                            >
-                              {req.met && (
-                                <Check className="w-2.5 h-2.5 text-white" />
-                              )}
-                            </div>
-                            <span
-                              className={`text-[11px] ${req.met ? "text-green-600 dark:text-green-400" : "text-gray-400"}`}
-                            >
-                              {req.text}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
                     </div>
 
-                    {/* Terms and Conditions */}
-                    <label className="flex items-start gap-3 cursor-pointer group">
-                      <div className="relative mt-0.5">
-                        <input
-                          type="checkbox"
-                          name="termsAccepted"
-                          checked={formData.termsAccepted}
-                          onChange={handleChange}
-                          className="sr-only"
-                        />
-                        <div
-                          className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-300 ${
-                            formData.termsAccepted
-                              ? "bg-gradient-to-br from-amber-400 to-orange-500 border-amber-500"
-                              : "border-gray-300 dark:border-white/20 group-hover:border-gray-400 dark:group-hover:border-white/30"
-                          }`}
-                        >
-                          {formData.termsAccepted && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                            >
-                              <Check className="w-3.5 h-3.5 text-white" />
-                            </motion.div>
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-sm text-gray-600 dark:text-gray-300 leading-snug">
-                        I've read and agree to the{" "}
-                        <span className="text-amber-600 dark:text-amber-400 font-medium hover:underline cursor-pointer">
-                          Terms &amp; Conditions
-                        </span>{" "}
-                        and{" "}
-                        <span className="text-amber-600 dark:text-amber-400 font-medium hover:underline cursor-pointer">
-                          Privacy Policy
-                        </span>
-                      </span>
-                    </label>
-                    {errors.termsAccepted && (
-                      <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-red-500 text-xs ml-8 -mt-2"
+                    <div className="space-y-2.5">
+                      {/* OS */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.05 }}
+                        className="flex items-start gap-3 p-3.5 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5"
                       >
-                        {errors.termsAccepted}
-                      </motion.p>
-                    )}
+                        <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-500/15">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5 text-blue-600 dark:text-blue-400"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="2" y="3" width="20" height="14" rx="2" />
+                            <line x1="8" y1="21" x2="16" y2="21" />
+                            <line x1="12" y1="17" x2="12" y2="21" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                            Operating System
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Windows 10/11 (64-bit) or Linux (Ubuntu 20.04+,
+                            Fedora 34+)
+                          </p>
+                        </div>
+                      </motion.div>
+
+                      {/* Storage */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className="flex items-start gap-3 p-3.5 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5"
+                      >
+                        <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-500/15">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5 text-purple-600 dark:text-purple-400"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <ellipse cx="12" cy="5" rx="9" ry="3" />
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                            Storage
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Minimum 512 GB available disk space (SSD recommended
+                            for faster load times)
+                          </p>
+                        </div>
+                      </motion.div>
+
+                      {/* RAM */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.15 }}
+                        className="flex items-start gap-3 p-3.5 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5"
+                      >
+                        <div className="p-2 rounded-lg bg-green-100 dark:bg-green-500/15">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5 text-green-600 dark:text-green-400"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="1" y="6" width="22" height="12" rx="2" />
+                            <line x1="6" y1="10" x2="6" y2="14" />
+                            <line x1="10" y1="10" x2="10" y2="14" />
+                            <line x1="14" y1="10" x2="14" y2="14" />
+                            <line x1="18" y1="10" x2="18" y2="14" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                            RAM (Memory)
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Minimum 8 GB (16 GB recommended for complex 3D
+                            models)
+                          </p>
+                        </div>
+                      </motion.div>
+
+                      {/* GPU */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="flex items-start gap-3 p-3.5 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5"
+                      >
+                        <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-500/15">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5 text-orange-600 dark:text-orange-400"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <rect x="4" y="4" width="16" height="16" rx="2" />
+                            <rect x="8" y="8" width="8" height="8" rx="1" />
+                            <line x1="2" y1="9" x2="4" y2="9" />
+                            <line x1="2" y1="15" x2="4" y2="15" />
+                            <line x1="20" y1="9" x2="22" y2="9" />
+                            <line x1="20" y1="15" x2="22" y2="15" />
+                            <line x1="9" y1="2" x2="9" y2="4" />
+                            <line x1="15" y1="2" x2="15" y2="4" />
+                            <line x1="9" y1="20" x2="9" y2="22" />
+                            <line x1="15" y1="20" x2="15" y2="22" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                            Graphics Card (GPU)
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            NVIDIA (GTX 1060+) or AMD (RX 580+) with latest
+                            drivers installed
+                          </p>
+                        </div>
+                      </motion.div>
+
+                      {/* Internet */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.25 }}
+                        className="flex items-start gap-3 p-3.5 rounded-xl border-2 border-gray-200 dark:border-white/10 bg-white/50 dark:bg-white/5"
+                      >
+                        <div className="p-2 rounded-lg bg-teal-100 dark:bg-teal-500/15">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5 text-teal-600 dark:text-teal-400"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+                            <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+                            <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                            <line x1="12" y1="20" x2="12.01" y2="20" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-800 dark:text-white">
+                            Internet Connection
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            Stable broadband connection (10 Mbps+ recommended
+                            for 3D content streaming)
+                          </p>
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    <div className="mt-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                      <p className="text-xs text-amber-700 dark:text-amber-400 text-center font-medium">
+                        ⚠️ Higher specifications are recommended for the best 3D
+                        visualization experience
+                      </p>
+                    </div>
                   </motion.div>
                 )}
 
@@ -880,9 +1067,9 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {otpSent ? (
                           <>
-                            We've sent a 6-digit code to{" "}
+                            We've sent a 4-digit code to{" "}
                             <span className="font-medium text-gray-700 dark:text-gray-200">
-                              {formData.email}
+                              {formData.mobile}
                             </span>
                           </>
                         ) : (
@@ -892,27 +1079,82 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                     </div>
 
                     {!otpSent ? (
-                      <motion.button
-                        type="button"
-                        onClick={sendOTP}
-                        className="w-full py-3.5 rounded-xl font-semibold text-white text-sm
-                          bg-gradient-to-r from-amber-500 via-orange-500 to-red-500
-                          hover:from-amber-600 hover:via-orange-600 hover:to-red-600
-                          shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40
-                          transition-all duration-300"
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        Send Verification Code
-                      </motion.button>
+                      <div className="space-y-4">
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          <label className="flex items-center gap-3 cursor-pointer group w-max mx-auto">
+                            <div className="relative flex items-center">
+                              <input
+                                type="checkbox"
+                                name="sendOtpOnWhatsapp"
+                                checked={formData.sendOtpOnWhatsapp}
+                                onChange={handleChange}
+                                className="sr-only peer"
+                              />
+                              <div
+                                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-300
+                                ${
+                                  formData.sendOtpOnWhatsapp
+                                    ? "bg-gradient-to-br from-green-400 to-emerald-500 border-green-500 shadow-md shadow-green-500/20"
+                                    : "border-gray-300 dark:border-white/20 bg-white/50 dark:bg-white/5 group-hover:border-gray-400 dark:group-hover:border-white/30"
+                                }`}
+                              >
+                                {formData.sendOtpOnWhatsapp && (
+                                  <motion.div
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{
+                                      type: "spring",
+                                      stiffness: 500,
+                                      damping: 25,
+                                    }}
+                                  >
+                                    <Check className="w-3.5 h-3.5 text-white" />
+                                  </motion.div>
+                                )}
+                              </div>
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              Send OTP on WhatsApp
+                            </span>
+                          </label>
+                        </motion.div>
+                        <motion.button
+                          type="button"
+                          onClick={sendOTP}
+                          className="w-full py-3.5 rounded-xl font-semibold text-white text-sm
+                            bg-gradient-to-r from-amber-500 via-orange-500 to-red-500
+                            hover:from-amber-600 hover:via-orange-600 hover:to-red-600
+                            shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40
+                            transition-all duration-300"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          Send Verification Code
+                        </motion.button>
+                      </div>
                     ) : (
                       <>
-                        <OTPInput
+                        <FloatingInput
+                          icon={Shield}
+                          label="Enter 4-digit OTP"
+                          name="otp"
                           value={formData.otp}
-                          onChange={(val) =>
-                            setFormData((prev) => ({ ...prev, otp: val }))
-                          }
+                          onChange={handleInputChange}
                         />
+                        {isSubmitting && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-center justify-center gap-2 text-sm text-amber-600 dark:text-amber-400"
+                          >
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Verifying & registering...</span>
+                          </motion.div>
+                        )}
                         <div className="text-center">
                           {otpTimer > 0 ? (
                             <p className="text-sm text-gray-400 dark:text-gray-500">
@@ -933,6 +1175,237 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                         </div>
                       </>
                     )}
+
+                    {/* Terms and Conditions */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.2 }}
+                      className="mt-2"
+                    >
+                      <label className="flex items-start gap-3 cursor-pointer group">
+                        <div className="relative mt-0.5">
+                          <input
+                            type="checkbox"
+                            name="termsAccepted"
+                            checked={formData.termsAccepted}
+                            onChange={handleChange}
+                            className="sr-only peer"
+                          />
+                          <div
+                            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-300
+                            ${
+                              formData.termsAccepted
+                                ? "bg-gradient-to-br from-amber-400 to-orange-500 border-amber-500 shadow-md shadow-amber-500/20"
+                                : "border-gray-300 dark:border-white/20 bg-white/50 dark:bg-white/5 group-hover:border-gray-400 dark:group-hover:border-white/30"
+                            }`}
+                          >
+                            {formData.termsAccepted && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{
+                                  type: "spring",
+                                  stiffness: 500,
+                                  damping: 25,
+                                }}
+                              >
+                                <Check className="w-3.5 h-3.5 text-white" />
+                              </motion.div>
+                            )}
+                          </div>
+                        </div>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                          I agree to the{" "}
+                          <a
+                            href="/terms"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline underline-offset-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Terms & Conditions
+                          </a>{" "}
+                          and{" "}
+                          <a
+                            href="/privacy"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 underline underline-offset-2"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            Privacy Policy
+                          </a>
+                          . By registering, I consent to the collection and use
+                          of my data as described.
+                        </span>
+                      </label>
+                      {errors.termsAccepted && (
+                        <motion.p
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-red-500 text-xs mt-1.5 ml-8"
+                        >
+                          {errors.termsAccepted}
+                        </motion.p>
+                      )}
+                    </motion.div>
+
+                    {/* Submit Error */}
+                    {submitError && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20"
+                      >
+                        <p className="text-xs text-red-600 dark:text-red-400 text-center font-medium">
+                          {submitError}
+                        </p>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* Registration Success - Password Display */}
+                {registrationSuccess && (
+                  <motion.div
+                    key="success"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    className="space-y-5"
+                  >
+                    <div className="text-center space-y-3">
+                      <motion.div
+                        className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center shadow-xl shadow-green-500/20"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 20,
+                          delay: 0.1,
+                        }}
+                      >
+                        <PartyPopper className="w-8 h-8 text-white" />
+                      </motion.div>
+                      <motion.h3
+                        className="text-xl font-bold text-gray-800 dark:text-white"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        Registration Successful!
+                      </motion.h3>
+                      <motion.p
+                        className="text-sm text-gray-500 dark:text-gray-400"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        Welcome, {formData.firstName}! Your account has been
+                        created.
+                      </motion.p>
+                    </div>
+
+                    {generatedPassword && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.35 }}
+                        className="space-y-3"
+                      >
+                        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border-2 border-amber-300 dark:border-amber-500/30">
+                          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-2 text-center">
+                            🔐 Your Login Password
+                          </p>
+                          <div className="flex items-center gap-2 bg-white dark:bg-gray-900 rounded-lg px-4 py-3 border border-amber-200 dark:border-amber-500/20">
+                            <span className="flex-1 text-center font-mono text-lg font-bold text-gray-800 dark:text-white tracking-wider">
+                              {showPassword
+                                ? generatedPassword
+                                : "\u2022".repeat(
+                                    generatedPassword.length || 8,
+                                  )}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            >
+                              {showPassword ? (
+                                <EyeOff className="w-4 h-4" />
+                              ) : (
+                                <Eye className="w-4 h-4" />
+                              )}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={copyPassword}
+                              className={`p-1.5 rounded-lg transition-colors ${
+                                copied
+                                  ? "bg-green-100 dark:bg-green-500/15 text-green-600 dark:text-green-400"
+                                  : "hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                              }`}
+                            >
+                              {copied ? (
+                                <Check className="w-4 h-4" />
+                              ) : (
+                                <Copy className="w-4 h-4" />
+                              )}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+                          <p className="text-xs text-red-600 dark:text-red-400 text-center font-medium">
+                            ⚠️ Please save this password securely. You will need
+                            it to log in.
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    {/* Download Software Button */}
+                    {selectedCategory && CATEGORY_DOWNLOADS[selectedCategory] && (() => {
+                      const catInfo = CATEGORY_DOWNLOADS[selectedCategory];
+                      const downloadUrl = `${DOWNLOAD_BASE_URL}/${selectedCategory}/${catInfo.filename}`;
+                      return (
+                        <motion.a
+                          href={downloadUrl}
+                          download
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.45 }}
+                          className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-white text-sm
+                            bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600
+                            hover:from-blue-600 hover:via-indigo-600 hover:to-purple-700
+                            shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40
+                            transition-all duration-300"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Download className="w-5 h-5" />
+                          Download {catInfo.label} Software
+                        </motion.a>
+                      );
+                    })()}
+
+                    <motion.button
+                      type="button"
+                      onClick={handleSuccessClose}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                      className="w-full py-3 rounded-xl font-semibold text-white text-sm
+                        bg-gradient-to-r from-green-500 to-emerald-600
+                        hover:from-green-600 hover:to-emerald-700
+                        shadow-lg shadow-green-500/25 hover:shadow-green-500/40
+                        transition-all duration-300"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Continue to Dashboard
+                    </motion.button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -941,10 +1414,11 @@ const RegistrationModal = ({ isOpen, onClose }) => {
             {/* Footer Actions */}
             <div className="px-6 sm:px-8 pb-6 pt-2">
               <div className="flex items-center justify-between gap-4">
-                {step > 1 ? (
+                {step > 1 && !registrationSuccess ? (
                   <motion.button
                     type="button"
                     onClick={prevStep}
+                    disabled={isSubmitting}
                     className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-medium
                       text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-white/10
                       hover:bg-gray-200 dark:hover:bg-white/15 transition-all duration-200"
@@ -973,24 +1447,49 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                     Continue
                     <ChevronRight className="w-4 h-4" />
                   </motion.button>
-                ) : otpSent ? (
+                ) : otpSent && step === 4 && !registrationSuccess ? (
                   <motion.button
                     type="button"
                     onClick={handleSubmit}
-                    disabled={formData.otp.length < 6}
+                    disabled={
+                      formData.otp.length < 4 ||
+                      !formData.termsAccepted ||
+                      isSubmitting
+                    }
                     className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-300
                       ${
-                        formData.otp.length === 6
+                        formData.otp.length === 4 &&
+                        formData.termsAccepted &&
+                        !isSubmitting
                           ? "bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg shadow-green-500/25 hover:shadow-green-500/40"
                           : "bg-gray-300 dark:bg-white/10 cursor-not-allowed"
                       }`}
                     whileHover={
-                      formData.otp.length === 6 ? { scale: 1.02 } : {}
+                      formData.otp.length === 4 &&
+                      formData.termsAccepted &&
+                      !isSubmitting
+                        ? { scale: 1.02 }
+                        : {}
                     }
-                    whileTap={formData.otp.length === 6 ? { scale: 0.95 } : {}}
+                    whileTap={
+                      formData.otp.length === 4 &&
+                      formData.termsAccepted &&
+                      !isSubmitting
+                        ? { scale: 0.95 }
+                        : {}
+                    }
                   >
-                    <Check className="w-4 h-4" />
-                    Verify & Register
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Registering...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4" />
+                        Verify & Register
+                      </>
+                    )}
                   </motion.button>
                 ) : (
                   <div />

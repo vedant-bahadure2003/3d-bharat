@@ -123,22 +123,22 @@ const Hero = () => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <motion.button
-            onClick={openModal}
+          <motion.a
+            href="/#features"
             className="btn-primary"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            3D Education
-          </motion.button>
-          {/* <motion.a
+            Explore Platform{" "}
+          </motion.a>
+          <motion.a
             href="#challenges"
             className="px-8 py-4 border border-white/50 text-white rounded-xl font-medium hover:bg-white/10 backdrop-blur-sm transition-all duration-300"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             Learn More
-          </motion.a> */}
+          </motion.a>
         </motion.div>
       </div>
 

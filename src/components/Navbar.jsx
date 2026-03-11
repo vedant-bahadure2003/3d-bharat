@@ -130,17 +130,19 @@ const Navbar = () => {
                     className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-44 rounded-xl overflow-hidden shadow-xl border bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl border-gray-200 dark:border-white/10"
                   >
                     {trialsDropdownItems.map((item, i) => (
-                      <motion.a
+                      <motion.button
                         key={item.name}
-                        href={item.href}
                         initial={{ opacity: 0, x: -8 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.05, duration: 0.2 }}
-                        className="block px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors duration-150"
-                        onClick={() => setTrialsOpen(false)}
+                        className="block w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors duration-150"
+                        onClick={() => {
+                          setTrialsOpen(false);
+                          openModal(item.name.toLowerCase());
+                        }}
                       >
                         {item.name}
-                      </motion.a>
+                      </motion.button>
                     ))}
                   </motion.div>
                 )}
@@ -237,17 +239,17 @@ const Navbar = () => {
                     className="overflow-hidden pl-4"
                   >
                     {trialsDropdownItems.map((item) => (
-                      <a
+                      <button
                         key={item.name}
-                        href={item.href}
-                        className="block text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors py-1.5 text-sm"
+                        className="block w-full text-left text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors py-1.5 text-sm"
                         onClick={() => {
                           setMobileTrialsOpen(false);
                           setMobileMenuOpen(false);
+                          openModal(item.name.toLowerCase());
                         }}
                       >
                         {item.name}
-                      </a>
+                      </button>
                     ))}
                   </motion.div>
                 )}
