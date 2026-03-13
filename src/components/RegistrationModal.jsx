@@ -20,6 +20,7 @@ import {
   PartyPopper,
   Loader2,
   Download,
+  AlertTriangle,
 } from "lucide-react";
 import { registerUser, verifyOtp } from "../services/auth";
 import { useRegistrationModal } from "../context/RegistrationModalContext";
@@ -176,6 +177,49 @@ const OTPInput = ({ value, onChange, length = 4 }) => {
   );
 };
 
+const AgeLimitWarningModal = ({ isOpen, onClose, message }) => {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <motion.div
+            className="relative w-full max-w-sm rounded-2xl bg-white dark:bg-gray-900 border border-red-200 dark:border-red-500/20 shadow-2xl p-6 text-center space-y-4"
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-16 h-16 mx-auto rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
+              <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-500" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                Age Restriction
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                {message || "User must be 18 years or older to register."}
+              </p>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="w-full py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 shadow-lg shadow-red-500/20 transition-all duration-300 active:scale-[0.98]"
+            >
+              Understand
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
 const RegistrationModal = ({ isOpen, onClose }) => {
   const { selectedCategory } = useRegistrationModal();
   const navigate = useNavigate();
@@ -189,6 +233,8 @@ const RegistrationModal = ({ isOpen, onClose }) => {
   const [generatedPassword, setGeneratedPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showAgeWarning, setShowAgeWarning] = useState(false);
+  const [ageWarningMessage, setAgeWarningMessage] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -241,6 +287,8 @@ const RegistrationModal = ({ isOpen, onClose }) => {
         setGeneratedPassword("");
         setShowPassword(false);
         setCopied(false);
+        setShowAgeWarning(false);
+        setAgeWarningMessage("");
         setFormData({
           firstName: "",
           lastName: "",
@@ -345,11 +393,16 @@ const RegistrationModal = ({ isOpen, onClose }) => {
       setOtpSent(true);
       setOtpTimer(30);
     } catch (error) {
-      setSubmitError(
-        error?.data?.message ||
-          error.message ||
-          "Registration failed. Please try again.",
-      );
+      if (error.status === 400 && error.data?.message?.toLowerCase().includes("18 years")) {
+        setAgeWarningMessage(error.data.message);
+        setShowAgeWarning(true);
+      } else {
+        setSubmitError(
+          error?.data?.message ||
+            error.message ||
+            "Registration failed. Please try again.",
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -395,7 +448,7 @@ const RegistrationModal = ({ isOpen, onClose }) => {
 
   const handleSuccessClose = () => {
     onClose();
-    navigate("/education");
+    navigate("/");
   };
 
   const slideVariants = {
@@ -405,10 +458,11 @@ const RegistrationModal = ({ isOpen, onClose }) => {
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -486,7 +540,7 @@ const RegistrationModal = ({ isOpen, onClose }) => {
                     3D Evaluation and Education
                   </h2>
                   <p className="text-xs text-gray-800 dark:text-gray-400">
-This is a fully funtional demo for your kind evaluation and education purpose.Your valuable feedback is very much appreciated.       </p>
+This is a fully funtional demo for your kind evaluation and education purpose.<br></br> Your valuable feedback is very much appreciated.       </p>
                 </div>
               </motion.div>
             </div>
@@ -1498,8 +1552,16 @@ This is a fully funtional demo for your kind evaluation and education purpose.Yo
             </div>
           </motion.div>
         </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </AnimatePresence>
+
+      {/* Age Warning Modal */}
+      <AgeLimitWarningModal
+        isOpen={showAgeWarning}
+        onClose={() => setShowAgeWarning(false)}
+        message={ageWarningMessage}
+      />
+    </>
   );
 };
 
