@@ -15,6 +15,7 @@ import {
   Maximize2,
   SkipBack,
   SkipForward,
+  Navigation,
 } from "lucide-react";
 import VideosHeader from "./VideosHeader";
 
@@ -235,6 +236,16 @@ const Videos = () => {
       url: "https://3dbharat.com/storage/videos/Roller_Simulation_Tracking.mp4",
       duration: "3:00",
     },
+    // Metro Videos
+    {
+      id: 24,
+      category: "metro",
+      title: "Metro Bridge Video",
+      description:
+        "3D visualization and measurement analysis of metro bridge infrastructure, structural dimensions, and span details",
+      url: "https://3dbharat.miscos.in/storage/videos/Metro_Bridge_Video_2.mp4",
+      duration: "4:00",
+    },
   ];
 
   const categories = [
@@ -286,6 +297,13 @@ const Videos = () => {
       icon: Layers,
       count: videos.filter((v) => v.category === "merger").length,
       color: "from-emerald-500 to-teal-500",
+    },
+    {
+      id: "metro",
+      label: "Metro",
+      icon: Navigation,
+      count: videos.filter((v) => v.category === "metro").length,
+      color: "from-blue-500 to-indigo-500",
     },
   ];
 
