@@ -24,6 +24,7 @@ import RegistrationModal from "./components/RegistrationModal";
 // Lazy load heavy page components for better initial load performance
 const Measurement = lazy(() => import("./components/measurenment/Measurement"));
 const Videos = lazy(() => import("./components/videos/Videos"));
+const PaymentGateway = lazy(() => import("./components/payment/PaymentGateway"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -92,6 +93,14 @@ const AppContent = () => {
               element={
                 <Suspense fallback={<PageLoader />}>
                   <Videos />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/payment"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <PaymentGateway />
                 </Suspense>
               }
             />
